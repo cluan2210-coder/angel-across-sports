@@ -66,7 +66,6 @@ LO QUE NUNCA HACES:
 - Nunca das precios ni condiciones especiales sin escalar a Luis si no los conoces
 
 Responde siempre en español, de forma natural y concisa. Máximo 3-4 líneas por mensaje para no abrumar al cliente.`;
-
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
