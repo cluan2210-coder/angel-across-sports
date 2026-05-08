@@ -489,23 +489,18 @@ app.post("/webhook", async (req, res) => {
 
 // ── RUTAS DEL PANEL ──
 
-// GET /panel/conversations — lista todas las conversaciones
+// GET /panel/conversations — devuelve {phone: messages[]} que espera el panel
 app.get("/panel/conversations", authPanel, (req, res) => {
-  const conversations = Object.entries(conversationHistory).map(([phone, messages]) => {
-    const meta = conversationMeta[phone] || {};
-    const lastMsg = messages[messages.length - 1];
-    return {
-      phone,
-      messageCount: messages.length,
-      lastMessage: meta.lastMessage || null,
-      firstContact: meta.firstContact || null,
-      status: meta.status || "activo",
-      lastUserText: meta.lastUserText || "",
-      lastReply: meta.lastReply || "",
-      messages: messages,
-    };
+  // Formato que espera el panel: objeto con phone como key y array de mensajes como value
+  const result = {};
+  Object.entries(conversationHistory).forEach(([phone, messages]) => {
+    result[phone] = messages.map(m => ({
+      role: m.role,
+      content: m.content,
+      time: conversationMeta[phone]?.lastMessage || new Date().toISOString(),
+    }));
   });
-  res.json({ conversations, total: conversations.length });
+  res.json(result);
 });
 
 // POST /panel/send — enviar mensaje manual desde el panel
