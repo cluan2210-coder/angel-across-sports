@@ -1,14 +1,18 @@
 const express = require("express");
 const axios = require("axios");
+const path = require("path");
 const app = express();
 app.use(express.json());
+app.use(express.static(__dirname));
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const PANEL_PASSWORD = process.env.PANEL_PASSWORD || "acrosssports2024";
 
 const conversationHistory = {};
+const conversationMeta = {}; // guarda nombre, último mensaje, timestamps
 
 const ANGEL_PROMPT = `Eres Angel, el agente de ventas de Across Sports Perú. No eres un bot — eres el mejor vendedor de artículos deportivos del Perú. Tienes la mentalidad de un closer de élite: escuchas más de lo que hablas, haces las preguntas correctas, conectas emocionalmente con cada cliente y los guías naturalmente hacia la compra. Tu misión no es "vender" — es ayudar a cada persona a tomar la mejor decisión para su deporte, su familia o su negocio.
 
@@ -380,6 +384,16 @@ REGLAS ABSOLUTAS — NUNCA ROMPERLAS
 
 Responde siempre en español. Máximo 3-4 líneas por mensaje. La brevedad y la precisión son tu mayor arma.`;
 
+// ── MIDDLEWARE AUTH PANEL ──
+function authPanel(req, res, next) {
+  const pass = req.headers["x-panel-password"];
+  if (pass !== PANEL_PASSWORD) {
+    return res.status(401).json({ error: "No autorizado" });
+  }
+  next();
+}
+
+// ── WEBHOOK VERIFICACIÓN ──
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -392,6 +406,7 @@ app.get("/webhook", (req, res) => {
   }
 });
 
+// ── WEBHOOK MENSAJES ──
 app.post("/webhook", async (req, res) => {
   res.sendStatus(200);
   const body = req.body;
@@ -404,9 +419,22 @@ app.post("/webhook", async (req, res) => {
 
   const from = message.from;
   const text = message.text.body;
+  const now = new Date().toISOString();
 
   if (!conversationHistory[from]) conversationHistory[from] = [];
+  if (!conversationMeta[from]) {
+    conversationMeta[from] = { firstContact: now, lastMessage: now, messageCount: 0, status: "activo" };
+  }
+
   conversationHistory[from].push({ role: "user", content: text });
+  conversationMeta[from].lastMessage = now;
+  conversationMeta[from].messageCount++;
+  conversationMeta[from].lastUserText = text;
+
+  // Detectar escalada
+  if (text.includes("ESCALAR A LUIS") || text.includes("🔔")) {
+    conversationMeta[from].status = "escalado";
+  }
 
   if (conversationHistory[from].length > 20) {
     conversationHistory[from] = conversationHistory[from].slice(-20);
@@ -432,6 +460,12 @@ app.post("/webhook", async (req, res) => {
 
     const reply = claudeRes.data.content[0].text;
     conversationHistory[from].push({ role: "assistant", content: reply });
+    conversationMeta[from].lastReply = reply;
+
+    // Detectar escalada en respuesta de Angel
+    if (reply.includes("ESCALAR A LUIS") || reply.includes("🔔")) {
+      conversationMeta[from].status = "escalado";
+    }
 
     await axios.post(
       `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
@@ -451,6 +485,90 @@ app.post("/webhook", async (req, res) => {
   } catch (err) {
     console.error("Error:", err.response?.data || err.message);
   }
+});
+
+// ── RUTAS DEL PANEL ──
+
+// GET /panel/conversations — lista todas las conversaciones
+app.get("/panel/conversations", authPanel, (req, res) => {
+  const conversations = Object.entries(conversationHistory).map(([phone, messages]) => {
+    const meta = conversationMeta[phone] || {};
+    const lastMsg = messages[messages.length - 1];
+    return {
+      phone,
+      messageCount: messages.length,
+      lastMessage: meta.lastMessage || null,
+      firstContact: meta.firstContact || null,
+      status: meta.status || "activo",
+      lastUserText: meta.lastUserText || "",
+      lastReply: meta.lastReply || "",
+      messages: messages,
+    };
+  });
+  res.json({ conversations, total: conversations.length });
+});
+
+// POST /panel/send — enviar mensaje manual desde el panel
+app.post("/panel/send", authPanel, async (req, res) => {
+  const { phone, message } = req.body;
+  if (!phone || !message) {
+    return res.status(400).json({ error: "Falta phone o message" });
+  }
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to: phone,
+        type: "text",
+        text: { body: message },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Guardar en historial
+    if (!conversationHistory[phone]) conversationHistory[phone] = [];
+    conversationHistory[phone].push({ role: "assistant", content: message });
+    if (!conversationMeta[phone]) {
+      conversationMeta[phone] = { firstContact: new Date().toISOString(), status: "activo", messageCount: 0 };
+    }
+    conversationMeta[phone].lastMessage = new Date().toISOString();
+    conversationMeta[phone].lastReply = message;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error enviando mensaje:", err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || err.message });
+  }
+});
+
+// GET /panel/health — estado del sistema
+app.get("/panel/health", authPanel, (req, res) => {
+  res.json({
+    status: "online",
+    uptime: process.uptime(),
+    totalConversations: Object.keys(conversationHistory).length,
+    escaladas: Object.values(conversationMeta).filter(m => m.status === "escalado").length,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// GET /panel/campaigns — placeholder para campañas Meta
+app.get("/panel/campaigns", authPanel, (req, res) => {
+  res.json({
+    campaigns: [],
+    message: "Configura META_AD_ACCOUNT_ID en Railway para ver campañas reales.",
+  });
+});
+
+// ── SERVIR PANEL HTML ──
+app.get("/panel", (req, res) => {
+  res.sendFile(path.join(__dirname, "panel_completo.html"));
 });
 
 const PORT = process.env.PORT || 3000;
