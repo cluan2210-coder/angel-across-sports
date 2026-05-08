@@ -103,7 +103,7 @@ app.post("/webhook", async (req, res) => {
     const claudeRes = await axios.post(
       "https://api.anthropic.com/v1/messages",
       {
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-5",
         max_tokens: 1024,
         system: ANGEL_PROMPT,
         messages: conversationHistory[from],
