@@ -702,8 +702,15 @@ async function sendMsg() {
   if(!text) return;
   ta.value=''; ta.style.height='';
   if(activePhone) {
-    await api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
-    await selectConv(activePhone, document.getElementById('chatName').textContent.replace('Lead caliente','').trim());
+    // Agregar mensaje inmediatamente al historial local
+    if(!allConvs[activePhone]) allConvs[activePhone]=[];
+    allConvs[activePhone].push({role:'assistant',content:text});
+    // Recargar el chat para mostrar el mensaje
+    const name = document.getElementById('chatName').textContent.replace('Lead caliente','').trim();
+    const msgs = allConvs[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—'}));
+    renderMsgs(msgs);
+    // Enviar al servidor en background
+    api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
   } else {
     MSGS_DEMO.push({role:'assistant',text,time:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})});
     renderMsgs(MSGS_DEMO);
@@ -757,16 +764,21 @@ init();
 setInterval(async () => {
   const data = await api('/panel/conversations');
   if(data) {
+    const prevCount = activePhone ? (allConvs[activePhone]?.length || 0) : 0;
     allConvs = data;
     renderConvList();
     updateStats();
     if(activePhone && data[activePhone]) {
-      const msgs = data[activePhone];
-      const lastKnown = allConvs[activePhone]?.length || 0;
-      if(msgs.length > lastKnown) openChat(activePhone, document.getElementById('chatName')?.textContent?.replace('Lead caliente','').trim() || activePhone);
+      const newCount = data[activePhone].length;
+      // Solo recargar el chat si hay mensajes nuevos del cliente
+      if(newCount > prevCount) {
+        const name = document.getElementById('chatName')?.textContent?.replace('Lead caliente','').trim() || activePhone;
+        const msgs = data[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—'}));
+        renderMsgs(msgs);
+      }
     }
   }
-}, 15000);
+}, 8000);
 </script>
 </body>
 </html>
