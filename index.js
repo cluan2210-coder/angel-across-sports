@@ -559,7 +559,7 @@ app.post("/webhook", async (req, res) => {
         model: "claude-sonnet-4-5",
         max_tokens: 1024,
         system: ANGEL_PROMPT,
-        messages: conversationHistory[from],
+        messages: conversationHistory[from].map(m => ({ role: m.role, content: m.content })),
       },
       {
         headers: {
