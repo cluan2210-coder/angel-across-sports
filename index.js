@@ -605,13 +605,14 @@ app.post("/webhook", async (req, res) => {
 
 // GET /panel/conversations — devuelve {phone: messages[]} que espera el panel
 app.get("/panel/conversations", authPanel, (req, res) => {
-  // Formato que espera el panel: objeto con phone como key y array de mensajes como value
   const result = {};
   Object.entries(conversationHistory).forEach(([phone, messages]) => {
     result[phone] = messages.map(m => ({
       role: m.role,
       content: m.content,
       time: conversationMeta[phone]?.lastMessage || new Date().toISOString(),
+      imageUrl: m.imageUrl || null,
+      isImage: m.isImage || false,
     }));
   });
   res.json(result);
