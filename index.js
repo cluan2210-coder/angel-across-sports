@@ -47,12 +47,10 @@ console.log(`Datos cargados: ${Object.keys(conversationHistory).length} conversa
 
 // ── FOTOS DE PRODUCTOS ──
 const FOTOS = {
-  tatami: [
-    "https://drive.google.com/uc?export=view&id=1ivGljPY1QVseSvEdCLrasw776sud_bnk",
-    "https://drive.google.com/uc?export=view&id=1zZRpxot7SkzXizlxD3uSUM9q-MDXtOqn",
-    "https://drive.google.com/uc?export=view&id=1W9DEdTeELXYNEDyj_Q2_LF7sfprIJwNW",
-    "https://drive.google.com/uc?export=view&id=1iDjOm6dpshWtyG5EO5tabfaRH5RgwjEn",
-  ],
+  tatami_todos: "https://drive.google.com/uc?export=view&id=1ivGljPY1QVseSvEdCLrasw776sud_bnk",   // foto stock completo colores
+  tatami_4cm:   "https://drive.google.com/uc?export=view&id=1zZRpxot7SkzXizlxD3uSUM9q-MDXtOqn",   // foto 4cm con cinta métrica
+  tatami_2_5cm: "https://drive.google.com/uc?export=view&id=1W9DEdTeELXYNEDyj_Q2_LF7sfprIJwNW",   // foto 2.5cm con cinta métrica
+  tatami_3cm:   "https://drive.google.com/uc?export=view&id=1iDjOm6dpshWtyG5EO5tabfaRH5RgwjEn",   // foto tatamis rojo/azul apilados
 };
 
 async function enviarImagen(to, imageUrl, caption = "") {
@@ -76,6 +74,27 @@ async function enviarImagen(to, imageUrl, caption = "") {
   } catch (err) {
     console.error("Error enviando imagen:", err.response?.data || err.message);
   }
+}
+
+function getFotoTatami(userText, replyText) {
+  const texto = (userText + " " + replyText).toLowerCase();
+  // Si menciona 4cm específicamente
+  if (/4\s*cm|cuatro\s*cm/.test(texto)) {
+    return { url: FOTOS.tatami_4cm, caption: "🥋 Tatami 4cm — Across Sports Perú | S/63 por m²" };
+  }
+  // Si menciona 2.5cm específicamente  
+  if (/2\.5\s*cm|dos\s*y\s*medio/.test(texto)) {
+    return { url: FOTOS.tatami_2_5cm, caption: "🥋 Tatami 2.5cm — Across Sports Perú | S/34 por m²" };
+  }
+  // Si menciona 3cm específicamente
+  if (/3\s*cm|tres\s*cm/.test(texto)) {
+    return { url: FOTOS.tatami_3cm, caption: "🥋 Tatami 3cm — Across Sports Perú | S/45 por m²" };
+  }
+  // Pregunta general por tatami → foto del stock completo
+  if (/tatami|piso.*goma|mat.*artes|piso.*dojo/.test(texto)) {
+    return { url: FOTOS.tatami_todos, caption: "🥋 Tatamis disponibles — 2.5cm, 3cm y 4cm | Across Sports Perú" };
+  }
+  return null;
 }
 
 function debeEnviarFotos(userText, replyText) {
@@ -116,8 +135,12 @@ Saluda con energía, preséntate brevemente, haz UNA pregunta abierta que lo inv
 Ejemplo: "¡Hola! Soy Angel de Across Sports 👋 ¿Practicas algún deporte o estás buscando algo para empezar?"
 
 Cuando el cliente pregunta por un producto específico:
-Confirma que lo tienes, da UN dato de valor que no esperaba, luego pregunta por su contexto.
-Ejemplo: "¡Sí tenemos! Los tatamis de 4cm son los más elegidos para artes marciales en Lima 💪 ¿Es para uso propio o para un dojo/academia?"
+Confirma que lo tienes, presenta TODAS las variantes disponibles con precios, luego pregunta por su contexto.
+Ejemplo tatami: "¡Sí tenemos! 🥋 Tenemos 3 grosores:
+• 2.5cm → S/34/m² (colores: Rojo/Azul, Rojo/Negro, Gris/Negro, Azul/Negro)
+• 3cm → S/45/m² (colores: Rojo/Azul, Gris/Negro)
+• 4cm → S/63/m² (colores: Rojo/Azul, Gris/Negro)
+¿Es para uso personal, academia o dojo?"
 
 Cuando el cliente pide precio directamente:
 NO des el precio de inmediato. Primero califica. El precio sin contexto no cierra ventas.
@@ -489,16 +512,64 @@ app.post("/webhook", async (req, res) => {
   const entry = body.entry?.[0];
   const change = entry?.changes?.[0];
   const message = change?.value?.messages?.[0];
-  if (!message || message.type !== "text") return;
+  if (!message) return;
 
   const from = message.from;
-  const text = message.text.body;
   const now = new Date().toISOString();
 
   if (!conversationHistory[from]) conversationHistory[from] = [];
   if (!conversationMeta[from]) {
     conversationMeta[from] = { firstContact: now, lastMessage: now, messageCount: 0, status: "activo" };
   }
+
+  // Manejar imágenes recibidas
+  if (message.type === "image") {
+    const mediaId = message.image?.id;
+    const caption = message.image?.caption || "";
+    try {
+      // Obtener URL de la imagen
+      const mediaRes = await axios.get(
+        `https://graph.facebook.com/v18.0/${mediaId}`,
+        { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` } }
+      );
+      const imageUrl = mediaRes.data.url;
+      // Descargar imagen y convertir a base64
+      const imgData = await axios.get(imageUrl, {
+        responseType: "arraybuffer",
+        headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` }
+      });
+      const base64 = Buffer.from(imgData.data).toString("base64");
+      const mimeType = mediaRes.data.mime_type || "image/jpeg";
+      const dataUrl = `data:${mimeType};base64,${base64}`;
+      
+      const imgMsg = caption 
+        ? `[IMAGEN] ${caption}` 
+        : "[IMAGEN enviada por el cliente]";
+      
+      conversationHistory[from].push({ 
+        role: "user", 
+        content: imgMsg,
+        imageUrl: dataUrl,
+        isImage: true
+      });
+    } catch(e) {
+      conversationHistory[from].push({ 
+        role: "user", 
+        content: "[IMAGEN enviada por el cliente — voucher/foto]",
+        isImage: true
+      });
+    }
+    conversationMeta[from].lastMessage = now;
+    conversationMeta[from].messageCount++;
+    conversationMeta[from].lastUserText = "[IMAGEN]";
+    saveData();
+    return; // No procesar con Angel, solo guardar
+  }
+
+  // Solo procesar texto
+  if (message.type !== "text") return;
+
+  const text = message.text.body;
 
   conversationHistory[from].push({ role: "user", content: text });
   saveData();
@@ -559,12 +630,10 @@ app.post("/webhook", async (req, res) => {
       }
     );
 
-    // Enviar fotos si el contexto lo requiere
-    if (debeEnviarFotos(text, reply)) {
-      const fotos = FOTOS.tatami;
-      // Enviar solo 1 foto representativa para no saturar
-      const fotoIdx = Math.floor(Math.random() * fotos.length);
-      await enviarImagen(from, fotos[fotoIdx], "🥋 Tatami importado — Across Sports Perú");
+    // Enviar foto correcta según el producto mencionado
+    const fotoData = getFotoTatami(text, reply);
+    if (fotoData) {
+      await enviarImagen(from, fotoData.url, fotoData.caption);
     }
 
   } catch (err) {
@@ -623,6 +692,44 @@ app.post("/panel/send", authPanel, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error("Error enviando mensaje:", err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || err.message });
+  }
+});
+
+// POST /panel/send-image — enviar imagen desde el panel
+app.post("/panel/send-image", authPanel, async (req, res) => {
+  const { phone, imageUrl, caption } = req.body;
+  if (!phone || !imageUrl) {
+    return res.status(400).json({ error: "Falta phone o imageUrl" });
+  }
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to: phone,
+        type: "image",
+        image: { link: imageUrl, caption: caption || "" },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!conversationHistory[phone]) conversationHistory[phone] = [];
+    conversationHistory[phone].push({ 
+      role: "assistant", 
+      content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN enviada]",
+      imageUrl,
+      isImage: true
+    });
+    saveData();
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error enviando imagen:", err.response?.data || err.message);
     res.status(500).json({ error: err.response?.data || err.message });
   }
 });
