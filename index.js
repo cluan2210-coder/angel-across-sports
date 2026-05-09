@@ -480,16 +480,60 @@ app.post("/webhook", async (req, res) => {
   const entry = body.entry?.[0];
   const change = entry?.changes?.[0];
   const message = change?.value?.messages?.[0];
-  if (!message || message.type !== "text") return;
+  if (!message) return;
 
   const from = message.from;
-  const text = message.text.body;
   const now = new Date().toISOString();
 
   if (!conversationHistory[from]) conversationHistory[from] = [];
   if (!conversationMeta[from]) {
     conversationMeta[from] = { firstContact: now, lastMessage: now, messageCount: 0, status: "activo" };
   }
+
+  // Manejar imágenes recibidas
+  if (message.type === "image") {
+    const mediaId = message.image?.id;
+    const caption = message.image?.caption || "";
+    try {
+      // Obtener URL temporal de la imagen
+      const mediaRes = await axios.get(
+        `https://graph.facebook.com/v18.0/${mediaId}`,
+        { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` } }
+      );
+      const tempUrl = mediaRes.data.url;
+      // Descargar y subir a Cloudinary para URL permanente
+      const imgRes = await axios.get(tempUrl, {
+        responseType: "arraybuffer",
+        headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` }
+      });
+      const buffer = Buffer.from(imgRes.data);
+      const cloudUrl = await uploadToCloudinary(buffer, `whatsapp_${mediaId}.jpg`);
+      
+      conversationHistory[from].push({
+        role: "user",
+        content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN recibida del cliente]",
+        imageUrl: cloudUrl,
+        isImage: true
+      });
+      notificarLuis("📸 Cliente envió imagen\n+" + from + (caption ? "\n" + caption : "") + "\nPanel: https://angel-across-sports-production.up.railway.app/panel");
+    } catch(e) {
+      conversationHistory[from].push({
+        role: "user",
+        content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN recibida del cliente]",
+        isImage: true
+      });
+    }
+    conversationMeta[from].lastMessage = now;
+    conversationMeta[from].messageCount++;
+    conversationMeta[from].lastUserText = "[IMAGEN]";
+    saveData();
+    return;
+  }
+
+  // Solo procesar texto
+  if (message.type !== "text") return;
+
+  const text = message.text.body;
 
   conversationHistory[from].push({ role: 'user', content: text });
   saveData();
