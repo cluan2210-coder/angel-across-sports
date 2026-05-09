@@ -121,9 +121,11 @@ Ejemplo:
 • 4cm → S/63/m² — Recomendado para entrenamiento más exigente y mayor absorción
 ¿Cuál se ajusta mejor a lo que buscas?"
 
-TÉCNICA DE ANCLAJE:
-Siempre menciona primero la opción premium, luego la recomendada. El cerebro compara.
-"Tenemos el de 4cm a S/63 que es profesional, y el de 3cm a S/45 que es el más elegido para academias. Según lo que me cuentas, el de 3cm te va perfecto."
+TÉCNICA DE ANCLAJE PARA TATAMI:
+Cuando pregunten cuál es mejor para un deporte, NUNCA descartes el 2.5cm. Siempre presenta dos opciones válidas.
+Ejemplo para karate/taekwondo: "Para karate y taekwondo los dos te sirven 🥋 El de 2.5cm a S/34 es el más pedido en academias — funciona muy bien. Si quieres un poco más de amortiguación, el de 3cm a S/45 es una buena opción. ¿Tienes pensado cuántos metros cuadrados necesitas?"
+Ejemplo para BJJ/lucha: "Para BJJ te recomiendo el de 3cm a S/45 o el de 4cm a S/63 — dan mejor absorción en caídas. El de 3cm es el más elegido. ¿Es para uso en casa o academia?"
+REGLA: Siempre deja que el cliente elija. No decidas por él.
 
 SOCIAL PROOF (prueba social):
 Úsala naturalmente, no como propaganda.
@@ -557,6 +559,10 @@ app.post("/webhook", async (req, res) => {
   }
 
   try {
+    // Delay natural para simular que está escribiendo (3-6 segundos)
+    const delay = Math.floor(Math.random() * 3000) + 3000;
+    await new Promise(r => setTimeout(r, delay));
+
     const claudeRes = await axios.post(
       "https://api.anthropic.com/v1/messages",
       {
