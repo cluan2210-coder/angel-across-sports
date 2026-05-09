@@ -737,7 +737,7 @@ async function init() {
         return `<div class="cv-item ${i===0?'on':''}" onclick="selectConv('${phone}','${initials}')">
           <div class="cv-ava" style="background:${colors[i%colors.length]}">${initials}</div>
           <div class="cv-body">
-            <div class="cv-r1"><span class="cv-name">+${phone.slice(0,2)} *** ${phone.slice(-4)}</span><span class="cv-time">${msgs.length} msgs</span></div>
+            <div class="cv-r1"><span class="cv-name">+${phone}</span><span class="cv-time">${msgs.length} msgs</span></div>
             <div class="cv-prev">${String(last?.content||'').slice(0,45)}...</div>
             <div class="cv-cat">${esc2?'🔔 Escalada':'💬 WhatsApp'}</div>
           </div>
