@@ -749,7 +749,6 @@ async function handleImageUpload(event) {
   fd.append('file', file);
   fd.append('upload_preset', 'acros_panel');
   fd.append('folder', 'acros-sports');
-  fd.append('transformation', 'w_1024,h_1024,c_limit,q_70');
 
   alert('⏳ Enviando imagen...');
 
@@ -853,7 +852,7 @@ setInterval(async () => {
   if(data) {
     const prevCount = activePhone ? (allConvs[activePhone]?.length || 0) : 0;
     allConvs = data;
-    renderConvList();
+    renderConvs();
     updateStats();
     if(activePhone && data[activePhone]) {
       const newCount = data[activePhone].length;
