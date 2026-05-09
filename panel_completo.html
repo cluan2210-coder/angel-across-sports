@@ -767,9 +767,7 @@ async function init() {
         </div>`;
       }).join('') + `<div class="cv-more"><span>Ver todas las conversaciones</span><span>→</span></div>`;
       if(entries.length) {
-        activePhone = entries[0][0];
-        const msgs = entries[0][1].map(m=>({role:m.role,text:m.content,name:'Cliente',time:'—'}));
-        renderMsgs(msgs);
+        selectConv(entries[0][0], entries[0][0].slice(-4));
       }
     }
   }
