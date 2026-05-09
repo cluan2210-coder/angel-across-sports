@@ -3,7 +3,7 @@ const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.static(__dirname));
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
@@ -693,21 +693,27 @@ app.post('/panel/upload-and-send', authPanel, upload.single('image'), async (req
   }
 });
 
-// POST /panel/send-base64-image — recibe base64, sube a Cloudinary, envía por WhatsApp
+// POST /panel/send-base64-image — recibe base64, comprime con sharp, sube a Cloudinary, envía por WhatsApp
 app.post('/panel/send-base64-image', authPanel, async (req, res) => {
   const { phone, imageBase64, caption } = req.body;
   if (!phone || !imageBase64) return res.status(400).json({ error: 'Falta phone o imagen' });
   try {
-    // Subir base64 directo a Cloudinary
-    const url = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'acros-sports', resource_type: 'image' },
-        (error, result) => { if (error) reject(error); else resolve(result.secure_url); }
-      );
-      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-      const buffer = Buffer.from(base64Data, 'base64');
-      stream.end(buffer);
-    });
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    let buffer = Buffer.from(base64Data, 'base64');
+    
+    // Comprimir con sharp si está disponible
+    try {
+      const sharp = require('sharp');
+      buffer = await sharp(buffer)
+        .resize(1280, 1280, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 75 })
+        .toBuffer();
+      console.log('Imagen comprimida:', buffer.length, 'bytes');
+    } catch(e) {
+      console.log('Sharp no disponible, usando imagen original');
+    }
+
+    const url = await uploadToCloudinary(buffer, 'panel_image.jpg');
     await axios.post(
       `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
       { messaging_product: 'whatsapp', to: phone, type: 'image', image: { link: url, caption: caption || '' } },
@@ -749,4 +755,3 @@ app.get("/panel", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Angel corriendo en puerto ${PORT}`));
-"sharp": "^0.33.0"
