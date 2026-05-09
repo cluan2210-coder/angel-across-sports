@@ -494,35 +494,34 @@ app.post("/webhook", async (req, res) => {
   if (message.type === "image") {
     const mediaId = message.image?.id;
     const caption = message.image?.caption || "";
+    let imageUrl = null;
     try {
-      // Obtener URL temporal de la imagen
+      // Obtener URL de descarga de WhatsApp
       const mediaRes = await axios.get(
         `https://graph.facebook.com/v18.0/${mediaId}`,
         { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` } }
       );
       const tempUrl = mediaRes.data.url;
-      // Descargar y subir a Cloudinary para URL permanente
+      // Descargar imagen
       const imgRes = await axios.get(tempUrl, {
         responseType: "arraybuffer",
         headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` }
       });
       const buffer = Buffer.from(imgRes.data);
-      const cloudUrl = await uploadToCloudinary(buffer, `whatsapp_${mediaId}.jpg`);
-      
-      conversationHistory[from].push({
-        role: "user",
-        content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN recibida del cliente]",
-        imageUrl: cloudUrl,
-        isImage: true
-      });
-      notificarLuis("📸 Cliente envió imagen\n+" + from + (caption ? "\n" + caption : "") + "\nPanel: https://angel-across-sports-production.up.railway.app/panel");
+      // Subir a Cloudinary
+      imageUrl = await uploadToCloudinary(buffer, `wa_${mediaId}.jpg`);
+      console.log("Imagen subida a Cloudinary:", imageUrl);
     } catch(e) {
-      conversationHistory[from].push({
-        role: "user",
-        content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN recibida del cliente]",
-        isImage: true
-      });
+      console.error("Error procesando imagen:", e.message);
     }
+    
+    conversationHistory[from].push({
+      role: "user",
+      content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN del cliente]",
+      imageUrl: imageUrl || null,
+      isImage: true
+    });
+    notificarLuis("📸 Cliente envio imagen +" + from + (caption ? " - " + caption : "") + " - Panel: https://angel-across-sports-production.up.railway.app/panel");
     conversationMeta[from].lastMessage = now;
     conversationMeta[from].messageCount++;
     conversationMeta[from].lastUserText = "[IMAGEN]";
