@@ -14,6 +14,7 @@ const PANEL_PASSWORD = process.env.PANEL_PASSWORD || "acrosssports2024";
 const CLOUDINARY_CLOUD = process.env.CLOUDINARY_CLOUD || "dkoyl1oz8";
 const CLOUDINARY_KEY = process.env.CLOUDINARY_KEY || "268934121615558";
 const CLOUDINARY_SECRET = process.env.CLOUDINARY_SECRET || "jyErA75bPMYHTP_Kz5XQL5Gdxlk";
+const LUIS_PHONE = "51916646279"; // WhatsApp de Luis para notificaciones
 
 // ── PERSISTENCIA EN VOLUME /data ──
 const DATA_DIR = "/data";
@@ -495,27 +496,23 @@ function authPanel(req, res, next) {
 
 // ── WEBHOOK VERIFICACIÓN ──
 
-// MULTER + CLOUDINARY
+// MULTER + CLOUDINARY SDK
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({ cloud_name: CLOUDINARY_CLOUD, api_key: CLOUDINARY_KEY, api_secret: CLOUDINARY_SECRET });
 
 async function uploadToCloudinary(buffer, filename) {
-  const crypto = require('crypto');
-  const FormData = require('form-data');
-  const ts = Math.round(Date.now() / 1000);
-  const str = 'folder=acros-sports&timestamp=' + ts + CLOUDINARY_SECRET;
-  const sig = crypto.createHash('sha1').update(str).digest('hex');
-  const form = new FormData();
-  form.append('file', buffer, { filename: filename || 'image.jpg' });
-  form.append('api_key', CLOUDINARY_KEY);
-  form.append('timestamp', String(ts));
-  form.append('signature', sig);
-  form.append('folder', 'acros-sports');
-  const r = await axios.post(
-    'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload',
-    form, { headers: form.getHeaders() }
-  );
-  return r.data.secure_url;
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'acros-sports', resource_type: 'image' },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });
 }
 
 app.get("/webhook", (req, res) => {
@@ -604,9 +601,23 @@ app.post("/webhook", async (req, res) => {
   conversationMeta[from].messageCount++;
   conversationMeta[from].lastUserText = text;
 
+  // Notificar a Luis que llegó mensaje (solo si es el primer mensaje o hay escalada previa)
+  const isFirst = conversationHistory[from].length === 1;
+  if(isFirst) {
+    notificarLuis(`🔔 Nuevo cliente en Angel
+📱 +${from}
+💬 "${text.slice(0,100)}"`);
+  }
+
   // Detectar escalada
   if (text.includes("ESCALAR A LUIS") || text.includes("🔔")) {
     conversationMeta[from].status = "escalado";
+  }
+  // Detectar si cliente pide descuento o video
+  if (/descuento|rebaja|más barato|video|foto.*producto/i.test(text)) {
+    notificarLuis(`💡 Cliente pide atención especial
+📱 +${from}
+💬 "${text.slice(0,100)}"`);
   }
 
   if (conversationHistory[from].length > 20) {
@@ -639,6 +650,14 @@ app.post("/webhook", async (req, res) => {
     // Detectar escalada en respuesta de Angel
     if (reply.includes("ESCALAR A LUIS") || reply.includes("🔔")) {
       conversationMeta[from].status = "escalado";
+      // Notificar a Luis urgente
+      const resumen = reply.slice(0, 300);
+      notificarLuis(`⚠️ ANGEL NECESITA TU AYUDA
+📱 Cliente: +${from}
+
+${resumen}
+
+👉 Panel: https://angel-across-sports-production.up.railway.app/panel`);
     }
 
     await axios.post(
