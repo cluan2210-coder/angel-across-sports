@@ -47,10 +47,10 @@ console.log(`Datos cargados: ${Object.keys(conversationHistory).length} conversa
 
 // ── FOTOS DE PRODUCTOS ──
 const FOTOS = {
-  tatami_todos: "https://drive.google.com/uc?export=view&id=1ivGljPY1QVseSvEdCLrasw776sud_bnk",   // foto stock completo colores
-  tatami_4cm:   "https://drive.google.com/uc?export=view&id=1zZRpxot7SkzXizlxD3uSUM9q-MDXtOqn",   // foto 4cm con cinta métrica
-  tatami_2_5cm: "https://drive.google.com/uc?export=view&id=1W9DEdTeELXYNEDyj_Q2_LF7sfprIJwNW",   // foto 2.5cm con cinta métrica
-  tatami_3cm:   "https://drive.google.com/uc?export=view&id=1iDjOm6dpshWtyG5EO5tabfaRH5RgwjEn",   // foto tatamis rojo/azul apilados
+  tatami_2_5_colores: "https://drive.google.com/uc?export=view&id=1ivGljPY1QVseSvEdCLrasw776sud_bnk", // TATAMI 2.5 CM COLORES
+  tatami_todos:       "https://drive.google.com/uc?export=view&id=1zZRpxot7SkzXizlxD3uSUM9q-MDXtOqn", // TATAMI 2.5 3 Y 4 CM JUNTOS
+  tatami_dentado:     "https://drive.google.com/uc?export=view&id=1W9DEdTeELXYNEDyj_Q2_LF7sfprIJwNW", // DENTADO TATAMI (textura)
+  tatami_4cm_medida:  "https://drive.google.com/uc?export=view&id=1iDjOm6dpshWtyG5EO5tabfaRH5RgwjEn", // MEDIDA TATAMI 4CM
 };
 
 async function enviarImagen(to, imageUrl, caption = "") {
@@ -78,21 +78,21 @@ async function enviarImagen(to, imageUrl, caption = "") {
 
 function getFotoTatami(userText, replyText) {
   const texto = (userText + " " + replyText).toLowerCase();
-  // Si menciona 4cm específicamente
-  if (/4\s*cm|cuatro\s*cm/.test(texto)) {
-    return { url: FOTOS.tatami_4cm, caption: "🥋 Tatami 4cm — Across Sports Perú | S/63 por m²" };
+  // 4cm especifico → foto con cinta métrica del 4cm
+  if (/4.?cm|cuatro.?cm/.test(texto)) {
+    return { url: FOTOS.tatami_4cm_medida, caption: "🥋 Tatami 4cm — Across Sports Perú | S/63 por m²" };
   }
-  // Si menciona 2.5cm específicamente  
-  if (/2\.5\s*cm|dos\s*y\s*medio/.test(texto)) {
-    return { url: FOTOS.tatami_2_5cm, caption: "🥋 Tatami 2.5cm — Across Sports Perú | S/34 por m²" };
+  // 2.5cm especifico → foto colores del 2.5cm
+  if (/2.?5.?cm|dos.?medio/.test(texto)) {
+    return { url: FOTOS.tatami_2_5_colores, caption: "🥋 Tatami 2.5cm — Across Sports Perú | S/34 por m²" };
   }
-  // Si menciona 3cm específicamente
-  if (/3\s*cm|tres\s*cm/.test(texto)) {
-    return { url: FOTOS.tatami_3cm, caption: "🥋 Tatami 3cm — Across Sports Perú | S/45 por m²" };
+  // 3cm especifico → foto dentado (textura del tatami)
+  if (/3.?cm|tres.?cm/.test(texto)) {
+    return { url: FOTOS.tatami_dentado, caption: "🥋 Tatami 3cm — Across Sports Perú | S/45 por m²" };
   }
-  // Pregunta general por tatami → foto del stock completo
-  if (/tatami|piso.*goma|mat.*artes|piso.*dojo/.test(texto)) {
-    return { url: FOTOS.tatami_todos, caption: "🥋 Tatamis disponibles — 2.5cm, 3cm y 4cm | Across Sports Perú" };
+  // Pregunta general → foto con los 3 grosores juntos
+  if (/tatami|piso|mat/.test(texto)) {
+    return { url: FOTOS.tatami_todos, caption: "🥋 Tatamis disponibles: 2.5cm S/34 | 3cm S/45 | 4cm S/63 por m² — Across Sports Perú" };
   }
   return null;
 }
