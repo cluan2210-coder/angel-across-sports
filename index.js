@@ -10,7 +10,11 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const PANEL_PASSWORD = process.env.PANEL_PASSWORD || "acrosssports2024";
+const PANEL_PASSWORD = process.env.PANEL_PASSWORD || 'acrosssports2024';
+const CLOUDINARY_CLOUD = process.env.CLOUDINARY_CLOUD || 'dkoyl1oz8';
+const CLOUDINARY_KEY = process.env.CLOUDINARY_KEY || '268934121615558';
+const CLOUDINARY_SECRET = process.env.CLOUDINARY_SECRET || 'jyErA75bPMYHTP_Kz5XQL5Gdxlk';
+const LUIS_PHONE = '51916646279';
 
 // ── PERSISTENCIA EN VOLUME /data ──
 const DATA_DIR = "/data";
@@ -425,6 +429,36 @@ function authPanel(req, res, next) {
 }
 
 // ── WEBHOOK VERIFICACIÓN ──
+
+// MULTER
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
+
+// CLOUDINARY
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({ cloud_name: CLOUDINARY_CLOUD, api_key: CLOUDINARY_KEY, api_secret: CLOUDINARY_SECRET });
+
+async function uploadToCloudinary(buffer, filename) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'acros-sports', resource_type: 'image' },
+      (error, result) => { if (error) reject(error); else resolve(result.secure_url); }
+    );
+    stream.end(buffer);
+  });
+}
+
+// NOTIFICAR A LUIS
+async function notificarLuis(mensaje) {
+  try {
+    await axios.post(
+      'https://graph.facebook.com/v18.0/' + PHONE_NUMBER_ID + '/messages',
+      { messaging_product: 'whatsapp', to: LUIS_PHONE, type: 'text', text: { body: mensaje } },
+      { headers: { Authorization: 'Bearer ' + WHATSAPP_TOKEN, 'Content-Type': 'application/json' } }
+    );
+  } catch(e) { console.error('Error notif Luis:', e.message); }
+}
+
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -457,8 +491,11 @@ app.post("/webhook", async (req, res) => {
     conversationMeta[from] = { firstContact: now, lastMessage: now, messageCount: 0, status: "activo" };
   }
 
-  conversationHistory[from].push({ role: "user", content: text });
+  conversationHistory[from].push({ role: 'user', content: text });
   saveData();
+  if (conversationHistory[from].length === 1) {
+    notificarLuis('Nuevo cliente\n+' + from + '\n' + text.slice(0,80));
+  }
   conversationMeta[from].lastMessage = now;
   conversationMeta[from].messageCount++;
   conversationMeta[from].lastUserText = text;
@@ -496,8 +533,9 @@ app.post("/webhook", async (req, res) => {
     conversationMeta[from].lastReply = reply;
 
     // Detectar escalada en respuesta de Angel
-    if (reply.includes("ESCALAR A LUIS") || reply.includes("🔔")) {
-      conversationMeta[from].status = "escalado";
+    if (reply.includes('ESCALAR A LUIS') || reply.includes('🔔')) {
+      conversationMeta[from].status = 'escalado';
+      notificarLuis('ANGEL NECESITA TU AYUDA. Cliente: +' + from + ' - ' + reply.slice(0,100));
     }
 
     await axios.post(
@@ -571,6 +609,29 @@ app.post("/panel/send", authPanel, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error("Error enviando mensaje:", err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || err.message });
+  }
+});
+
+
+// POST /panel/upload-and-send — subir imagen a Cloudinary y enviar por WhatsApp
+app.post('/panel/upload-and-send', authPanel, upload.single('image'), async (req, res) => {
+  const phone = req.body.phone;
+  const caption = req.body.caption || '';
+  if (!phone || !req.file) return res.status(400).json({ error: 'Falta phone o imagen' });
+  try {
+    const url = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+    await axios.post(
+      'https://graph.facebook.com/v18.0/' + PHONE_NUMBER_ID + '/messages',
+      { messaging_product: 'whatsapp', to: phone, type: 'image', image: { link: url, caption } },
+      { headers: { Authorization: 'Bearer ' + WHATSAPP_TOKEN, 'Content-Type': 'application/json' } }
+    );
+    if (!conversationHistory[phone]) conversationHistory[phone] = [];
+    conversationHistory[phone].push({ role: 'assistant', content: caption ? '[IMAGEN] ' + caption : '[IMAGEN enviada]', imageUrl: url, isImage: true });
+    saveData();
+    res.json({ success: true, url });
+  } catch (err) {
+    console.error('Error upload:', err.response?.data || err.message);
     res.status(500).json({ error: err.response?.data || err.message });
   }
 });
