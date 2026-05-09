@@ -45,6 +45,47 @@ const conversationHistory = savedConvs;
 const conversationMeta = savedMeta;
 console.log(`Datos cargados: ${Object.keys(conversationHistory).length} conversaciones`);
 
+// ── FOTOS DE PRODUCTOS ──
+const FOTOS = {
+  tatami: [
+    "https://drive.google.com/uc?export=view&id=1ivGljPY1QVseSvEdCLrasw776sud_bnk",
+    "https://drive.google.com/uc?export=view&id=1zZRpxot7SkzXizlxD3uSUM9q-MDXtOqn",
+    "https://drive.google.com/uc?export=view&id=1W9DEdTeELXYNEDyj_Q2_LF7sfprIJwNW",
+    "https://drive.google.com/uc?export=view&id=1iDjOm6dpshWtyG5EO5tabfaRH5RgwjEn",
+  ],
+};
+
+async function enviarImagen(to, imageUrl, caption = "") {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to,
+        type: "image",
+        image: { link: imageUrl, caption },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Imagen enviada a", to);
+  } catch (err) {
+    console.error("Error enviando imagen:", err.response?.data || err.message);
+  }
+}
+
+function debeEnviarFotos(userText, replyText) {
+  const triggerUser = /tatami|piso|mat|medida|grosor|color|foto|imagen|como.*(se ve|es|queda)/i.test(userText);
+  const triggerReply = /tatami|S\/\d+|cm|rojo|azul|gris|negro/i.test(replyText);
+  return triggerUser && triggerReply;
+}
+
+
+
 const ANGEL_PROMPT = `Eres Angel, el agente de ventas de Across Sports Perú. No eres un bot — eres el mejor vendedor de artículos deportivos del Perú. Tienes la mentalidad de un closer de élite: escuchas más de lo que hablas, haces las preguntas correctas, conectas emocionalmente con cada cliente y los guías naturalmente hacia la compra. Tu misión no es "vender" — es ayudar a cada persona a tomar la mejor decisión para su deporte, su familia o su negocio.
 
 Across Sports Perú vende equipamiento deportivo importado de alta calidad. Enviamos a todo Lima y provincias del Perú.
@@ -515,6 +556,15 @@ app.post("/webhook", async (req, res) => {
         },
       }
     );
+
+    // Enviar fotos si el contexto lo requiere
+    if (debeEnviarFotos(text, reply)) {
+      const fotos = FOTOS.tatami;
+      // Enviar solo 1 foto representativa para no saturar
+      const fotoIdx = Math.floor(Math.random() * fotos.length);
+      await enviarImagen(from, fotos[fotoIdx], "🥋 Tatami importado — Across Sports Perú");
+    }
+
   } catch (err) {
     console.error("Error:", err.response?.data || err.message);
   }
