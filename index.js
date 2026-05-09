@@ -693,6 +693,36 @@ app.post('/panel/upload-and-send', authPanel, upload.single('image'), async (req
   }
 });
 
+// POST /panel/send-base64-image — recibe base64, sube a Cloudinary, envía por WhatsApp
+app.post('/panel/send-base64-image', authPanel, async (req, res) => {
+  const { phone, imageBase64, caption } = req.body;
+  if (!phone || !imageBase64) return res.status(400).json({ error: 'Falta phone o imagen' });
+  try {
+    // Subir base64 directo a Cloudinary
+    const url = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'acros-sports', resource_type: 'image' },
+        (error, result) => { if (error) reject(error); else resolve(result.secure_url); }
+      );
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      stream.end(buffer);
+    });
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      { messaging_product: 'whatsapp', to: phone, type: 'image', image: { link: url, caption: caption || '' } },
+      { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, 'Content-Type': 'application/json' } }
+    );
+    if (!conversationHistory[phone]) conversationHistory[phone] = [];
+    conversationHistory[phone].push({ role: 'assistant', content: caption ? `[IMAGEN] ${caption}` : '[IMAGEN enviada]', imageUrl: url, isImage: true });
+    saveData();
+    res.json({ success: true, url });
+  } catch (err) {
+    console.error('Error base64 upload:', err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || err.message });
+  }
+});
+
 // GET /panel/health — estado del sistema
 app.get("/panel/health", authPanel, (req, res) => {
   res.json({
