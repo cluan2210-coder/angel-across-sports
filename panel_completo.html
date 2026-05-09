@@ -645,18 +645,24 @@ function renderConvs() {
 function renderMsgs(msgs) {
   const el = document.getElementById('msgs');
   el.innerHTML = msgs.map(m => {
+    const text = m.text || m.content || '';
+    const isImg = m.isImage && m.imageUrl;
+    const imgHtml = isImg ? `<img src="${m.imageUrl}" style="max-width:240px;max-height:240px;border-radius:10px;display:block;margin-bottom:6px;cursor:pointer;object-fit:cover" onclick="window.open('${m.imageUrl}','_blank')" onerror="this.style.display='none'">` : '';
+    const timeHtml = (m.time||m.date) ? `<span style="font-size:10px;color:var(--text3);margin-left:4px">${m.time||''}</span>` : '';
     if(m.role==='user') return `
       <div class="msg-wrap msg-in">
-        <div class="msg-sender">${m.name}</div>
-        <div class="msg-bbl">${esc(m.text)}</div>
-        <div class="msg-meta"><span class="msg-agent">ACROS Agent</span><span>${m.time}</span></div>
+        <div class="msg-sender">${m.name||'Cliente'}</div>
+        ${imgHtml}
+        ${text ? `<div class="msg-bbl">${esc(text)}</div>` : ''}
+        <div class="msg-meta"><span class="msg-agent">Cliente</span>${timeHtml}</div>
       </div>`;
     return `
       <div class="msg-wrap msg-out">
-        <div class="msg-bbl">${esc(m.text)}</div>
+        ${imgHtml}
+        ${text ? `<div class="msg-bbl">${esc(text)}</div>` : ''}
         <div class="msg-meta">
           <span class="msg-agent">ACROS Agent</span>
-          <span>${m.time}</span>
+          ${timeHtml}
           <span class="msg-tick">✓✓</span>
         </div>
       </div>`;
@@ -692,7 +698,7 @@ async function selectConv(phone, name) {
 
   const data = await api('/panel/conversations');
   if(data && data[phone]) {
-    const msgs = data[phone].map(m=>({role:m.role,text:m.content,name:name,time:'—'}));
+    const msgs = data[phone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—',isImage:m.isImage,imageUrl:m.imageUrl}));
     renderMsgs(msgs);
   } else {
     renderMsgs(MSGS_DEMO);
@@ -737,7 +743,7 @@ async function sendMsg() {
     allConvs[activePhone].push({role:'assistant',content:text});
     // Recargar el chat para mostrar el mensaje
     const name = document.getElementById('chatName').textContent.replace('Lead caliente','').trim();
-    const msgs = allConvs[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—'}));
+    const msgs = allConvs[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—',isImage:m.isImage,imageUrl:m.imageUrl}));
     renderMsgs(msgs);
     // Enviar al servidor en background
     api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
@@ -783,7 +789,7 @@ async function init() {
       }).join('') + `<div class="cv-more"><span>Ver todas las conversaciones</span><span>→</span></div>`;
       if(entries.length) {
         activePhone = entries[0][0];
-        const msgs = entries[0][1].map(m=>({role:m.role,text:m.content,name:'Cliente',time:'—'}));
+        const msgs = entries[0][1].map(m=>({role:m.role,text:m.content||m.text,name:'Cliente',time:'—',isImage:m.isImage,imageUrl:m.imageUrl}));
         renderMsgs(msgs);
       }
     }
@@ -803,7 +809,7 @@ setInterval(async () => {
       // Solo recargar el chat si hay mensajes nuevos del cliente
       if(newCount > prevCount) {
         const name = document.getElementById('chatName')?.textContent?.replace('Lead caliente','').trim() || activePhone;
-        const msgs = data[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—'}));
+        const msgs = data[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—',isImage:m.isImage,imageUrl:m.imageUrl}));
         renderMsgs(msgs);
       }
     }
