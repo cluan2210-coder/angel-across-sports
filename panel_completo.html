@@ -597,6 +597,8 @@ svg{display:block}
 <script>
 const SERVER = 'https://angel-across-sports-production.up.railway.app';
 const PASS   = 'acrosssports2024';
+let allConvs = {};
+let activePhone = null;
 
 const CONVS_DEMO = [
   {id:'51960001111',name:'Juan Martínez',preview:'¿Tienen tatami de 4 cm en stock?',cat:'Tatami 4 cm',time:'11:24',unread:1,color:'#3b82f6',on:true},
@@ -676,8 +678,6 @@ function renderAutos() {
       </div>
     </div>`).join('');
 }
-
-let activePhone = null;
 
 async function selectConv(phone, name) {
   document.querySelectorAll('.cv-item').forEach(e=>e.classList.remove('on'));
