@@ -3,1226 +3,757 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Angel · Across Sports Perú</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>ACROS Agent CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d0d0d;--surface:#141414;--surface2:#1a1a1a;--surface3:#202020;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#f0f0f0;--text2:#9a9a9a;--text3:#555;
-  --accent:#e8002d;--accent-bg:rgba(232,0,45,0.09);
-  --green:#00c98b;--green-bg:rgba(0,201,139,0.09);
-  --blue:#3b82f6;--blue-bg:rgba(59,130,246,0.09);
-  --amber:#f59e0b;--amber-bg:rgba(245,158,11,0.09);
-  --purple:#a855f7;--purple-bg:rgba(168,85,247,0.09);
-  --r:8px;--rl:12px;--sw:220px;--th:56px;
+  --bg:#0f1117;
+  --s1:#161b27;
+  --s2:#1a2035;
+  --s3:#1e2640;
+  --s4:#242d4a;
+  --s5:#2a3558;
+  --card:#192032;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --text:#e8eaf0;
+  --text2:#8892aa;
+  --text3:#4a5470;
+  --red:#ef4444;
+  --red-s:rgba(239,68,68,0.12);
+  --green:#22c55e;
+  --green-s:rgba(34,197,94,0.12);
+  --blue:#3b82f6;
+  --blue-s:rgba(59,130,246,0.12);
+  --amber:#f59e0b;
+  --amber-s:rgba(245,158,11,0.12);
+  --purple:#8b5cf6;
+  --teal:#06b6d4;
   --font:'Inter',-apple-system,sans-serif;
-  --mono:'JetBrains Mono',monospace;
+  --r:8px;
+  --r2:12px;
 }
-html{font-size:14px}
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-button{font-family:var(--font);cursor:pointer}
-input,textarea,select{font-family:var(--font)}
-::-webkit-scrollbar{width:3px;height:3px}
-::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:var(--font);cursor:pointer;border:none;outline:none}
+input,textarea,select{font-family:var(--font);outline:none}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s4);border-radius:4px}
+svg{display:block}
 
-/* ── LAYOUT ── */
-.app{display:flex;min-height:100vh}
+/* ─── SHELL ─── */
+.shell{display:grid;grid-template-columns:240px 1fr;grid-template-rows:52px 1fr;height:100vh}
 
-/* ── SIDEBAR ── */
-.sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:transform .25s ease}
-.s-logo{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--border)}
-.s-mark{width:30px;height:30px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
-.s-name{font-weight:600;font-size:13px;line-height:1.2}
-.s-sub{font-size:10px;color:var(--text3)}
-.s-nav{flex:1;padding:10px 8px;overflow-y:auto}
-.nav-sec{margin-bottom:18px}
-.nav-lbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:0 8px;margin-bottom:3px}
-.nav-btn{display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:var(--r);font-size:12.5px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .12s;position:relative;border:none;background:none;width:100%;text-align:left}
-.nav-btn:hover{background:var(--surface2);color:var(--text)}
-.nav-btn.active{background:var(--accent-bg);color:var(--text)}
-.nav-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;background:var(--accent);border-radius:0 2px 2px 0}
-.nav-ico{font-size:14px;flex-shrink:0}
-.n-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;animation:badgePop .2s ease}
-@keyframes badgePop{from{transform:scale(0.7)}to{transform:scale(1)}}
-.live-dot{margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px var(--green-bg);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.s-footer{padding:12px 12px;border-top:1px solid var(--border)}
-.s-status{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--green-bg);border:1px solid rgba(0,201,139,.15);border-radius:var(--r)}
-.s-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-.s-status-txt{font-size:11px;font-weight:500;color:var(--green)}
+/* ─── SIDEBAR ─── */
+.sidebar{grid-row:1/3;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sb-brand{padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo{width:36px;height:36px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;letter-spacing:-1px}
+.sb-brand-text{flex:1}
+.sb-name{font-weight:700;font-size:14px;line-height:1.2}
+.sb-sub{font-size:10.5px;color:var(--text3);font-weight:400}
+.sb-collapse{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;transition:all .15s}
+.sb-collapse:hover{background:var(--s3);color:var(--text2)}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;position:relative;user-select:none}
+.sb-item:hover{background:var(--s3);color:var(--text)}
+.sb-item.on{background:linear-gradient(90deg,rgba(59,130,246,0.18),rgba(59,130,246,0.06));color:var(--text);border:1px solid rgba(59,130,246,0.2)}
+.sb-item .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.sb-footer{padding:12px 8px;border-top:1px solid var(--border)}
+.sb-agent{background:var(--s3);border:1px solid var(--border2);border-radius:var(--r2);padding:12px}
+.sb-agent-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.dot-green{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px rgba(34,197,94,.5)}
+.sb-agent-name{font-size:12px;font-weight:600}
+.sb-agent-sub{font-size:11px;color:var(--text2);margin-bottom:8px}
+.sb-agent-btn{width:100%;padding:7px;border-radius:7px;background:var(--s4);border:1px solid var(--border2);color:var(--text2);font-size:11.5px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all .15s}
+.sb-agent-btn:hover{background:var(--s5);color:var(--text)}
+.sb-brand2{display:flex;align-items:center;gap:8px;padding:10px 4px 0}
+.sb-logo2{width:32px;height:32px;background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.sb-brand2-text{}
+.sb-brand2-name{font-size:11.5px;font-weight:600}
+.sb-brand2-plan{font-size:10px;color:var(--text3)}
 
-/* ── MAIN ── */
-.main{margin-left:var(--sw);flex:1;min-width:0;display:flex;flex-direction:column}
+/* ─── TOPBAR ─── */
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px}
+.t-search{flex:1;max-width:420px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:8px;padding:0 12px;height:34px}
+.t-search input{flex:1;background:none;border:none;color:var(--text);font-size:12.5px}
+.t-search input::placeholder{color:var(--text3)}
+.t-search-key{background:var(--s4);border:1px solid var(--border2);border-radius:5px;padding:1px 6px;font-size:10px;color:var(--text3);font-family:monospace}
+.t-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.t-workspace{display:flex;align-items:center;gap:7px;padding:5px 12px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.t-workspace:hover{border-color:var(--border2)}
+.t-workspace svg{color:var(--text2)}
+.t-active{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--green-s);border:1px solid rgba(34,197,94,0.25);border-radius:20px;font-size:11.5px;font-weight:500;color:var(--green)}
+.t-active-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.t-icon{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:18px;cursor:pointer;transition:all .15s;position:relative}
+.t-icon:hover{background:var(--s3);color:var(--text)}
+.t-notif-badge{position:absolute;top:4px;right:4px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--s1)}
+.t-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;cursor:pointer}
 
-/* ── TOPBAR ── */
-.topbar{height:var(--th);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:10px;position:sticky;top:0;z-index:100}
-.t-menu{display:none;background:none;border:none;color:var(--text2);font-size:18px;padding:4px;cursor:pointer}
-.t-title{font-size:15px;font-weight:600;flex:1}
-.t-actions{display:flex;gap:6px;align-items:center}
+/* ─── CONTENT ─── */
+.content{display:flex;flex-direction:column;overflow:hidden}
 
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r);font-size:12px;font-weight:500;border:1px solid var(--border2);background:var(--surface2);color:var(--text);transition:all .12s;cursor:pointer;white-space:nowrap}
-.btn:hover{background:var(--surface3);border-color:rgba(255,255,255,.18)}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn-primary:hover{background:#c9001a;border-color:#c9001a}
-.btn-green{background:var(--green-bg);border-color:rgba(0,201,139,.3);color:var(--green)}
-.btn-ghost{background:transparent;border-color:transparent}
-.btn-ghost:hover{background:var(--surface2);border-color:var(--border)}
-.btn-sm{padding:5px 10px;font-size:11px}
-.btn-xs{padding:3px 8px;font-size:10px}
-.btn-icon{padding:6px;gap:0}
+/* ─── KPI ROW ─── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px 0}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;position:relative;overflow:hidden}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.kpi-icon{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:17px}
+.kpi-label{font-size:11.5px;color:var(--text2);font-weight:500}
+.kpi-val{font-size:26px;font-weight:700;line-height:1;letter-spacing:-0.5px;margin-bottom:6px}
+.kpi-trend{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500}
+.kpi-trend.up{color:var(--green)}
+.kpi-trend.down{color:var(--red)}
+.kpi-sparkline{position:absolute;bottom:0;right:0;opacity:.5}
 
-/* ── VIEWS ── */
-.view{display:none;padding:20px;animation:fadeIn .18s ease}
-.view.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+/* ─── MAIN GRID ─── */
+.main-grid{flex:1;display:grid;grid-template-columns:280px 1fr 300px;grid-template-rows:1fr auto;overflow:hidden;gap:0;padding:12px 20px;gap:12px}
 
-/* ── STAT CARDS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;transition:border-color .2s}
-.stat:hover{border-color:var(--border2)}
-.stat-lbl{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.stat-ico{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px}
-.ico-red{background:var(--accent-bg)} .ico-green{background:var(--green-bg)} .ico-blue{background:var(--blue-bg)} .ico-amber{background:var(--amber-bg)} .ico-purple{background:var(--purple-bg)}
-.stat-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums}
-.stat-meta{font-size:11px;color:var(--text3)}
-.trend-up{color:var(--green);font-weight:500} .trend-dn{color:var(--accent);font-weight:500}
+/* ─── CONV LIST ─── */
+.cv{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);display:flex;flex-direction:column;overflow:hidden}
+.cv-head{padding:12px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cv-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.cv-title{font-weight:600;font-size:14px}
+.cv-filter{display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:3px 9px;font-size:11.5px;color:var(--text2);cursor:pointer}
+.cv-filter svg{color:var(--text2)}
+.cv-head-icons{display:flex;gap:4px}
+.cv-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;cursor:pointer;transition:all .12s}
+.cv-ico:hover{background:var(--s3)}
+.cv-search{position:relative;margin-bottom:0}
+.cv-search input{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:6px 10px 6px 30px;color:var(--text);font-size:12px}
+.cv-search input::placeholder{color:var(--text3)}
+.cv-search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+.cv-list{flex:1;overflow-y:auto}
+.cv-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
+.cv-item:hover{background:rgba(255,255,255,.03)}
+.cv-item.on{background:rgba(59,130,246,.06);border-left:3px solid var(--blue)}
+.cv-item.on{padding-left:11px}
+.cv-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;font-size:12px}
+.cv-body{flex:1;min-width:0}
+.cv-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.cv-name{font-weight:600;font-size:13px}
+.cv-time{font-size:10.5px;color:var(--text3)}
+.cv-prev{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.cv-cat{font-size:10.5px;color:var(--text3)}
+.cv-unread{width:18px;height:18px;background:var(--blue);border-radius:50%;font-size:9.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.cv-more{padding:10px 14px;text-align:center;font-size:12px;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.cv-more:hover{background:rgba(59,130,246,.05)}
 
-/* ── SECTION ── */
-.sec{margin-bottom:24px}
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.sec-title{font-size:13px;font-weight:600}
-.sec-sub{font-size:11px;color:var(--text3);margin-top:1px}
+/* ─── CHAT ─── */
+.chat{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);display:flex;flex-direction:column;overflow:hidden}
+.chat-head{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chat-ava{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.chat-info{flex:1}
+.chat-name{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.chat-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.chat-sub{font-size:11px;color:var(--text2)}
+.chat-head-icons{display:flex;gap:4px}
+.chat-ico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s}
+.chat-ico:hover{background:var(--s3)}
+.msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.msg-wrap{display:flex;flex-direction:column;gap:3px}
+.msg-sender{font-size:11px;font-weight:600;color:var(--text2);padding:0 2px}
+.msg-bbl{padding:9px 13px;border-radius:12px;font-size:12.5px;line-height:1.55;max-width:80%;word-break:break-word;white-space:pre-wrap}
+.msg-in .msg-bbl{background:var(--s3);border:1px solid var(--border);border-radius:4px 12px 12px 12px}
+.msg-out{align-items:flex-end}
+.msg-out .msg-bbl{background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(139,92,246,.15));border:1px solid rgba(59,130,246,.3);border-radius:12px 4px 12px 12px}
+.msg-meta{font-size:10.5px;color:var(--text3);padding:0 3px;display:flex;align-items:center;gap:4px}
+.msg-agent{font-size:10px;color:var(--blue);font-weight:500}
+.msg-tick{color:var(--blue);font-size:11px}
+.msg-esc{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:8px 12px;font-size:11.5px;color:var(--amber);align-self:center;max-width:92%;white-space:pre-wrap;line-height:1.5}
+.chat-input-wrap{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-input-box{background:var(--s3);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;display:flex;align-items:center;gap:8px;margin-bottom:9px;transition:border-color .15s}
+.chat-input-box:focus-within{border-color:var(--border2)}
+.chat-input-box textarea{flex:1;background:none;border:none;color:var(--text);font-size:12.5px;resize:none;min-height:22px;max-height:80px;line-height:1.5}
+.chat-input-box textarea::placeholder{color:var(--text3)}
+.chat-input-icons{display:flex;gap:4px;align-items:center}
+.ci-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:16px;cursor:pointer;transition:all .12s}
+.ci-icon:hover{background:var(--s4);color:var(--text)}
+.chat-send-btn{padding:6px 16px;background:var(--blue);border-radius:7px;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s}
+.chat-send-btn:hover{background:#2563eb}
+.chat-actions{display:flex;gap:7px;flex-wrap:wrap}
+.ca-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--border)}
+.ca-btn:hover{background:var(--s3)}
+.ca-reply{background:var(--blue-s);border-color:rgba(59,130,246,.3);color:var(--blue)}
+.ca-reply:hover{background:rgba(59,130,246,.2)}
+.ca-default{background:var(--s3);color:var(--text2)}
 
-/* ── TABLE ── */
-.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-.tbl-wrap table{width:100%;border-collapse:collapse}
-.tbl-wrap th{padding:9px 14px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border)}
-.tbl-wrap td{padding:11px 14px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text2)}
-.tbl-wrap tr:last-child td{border-bottom:none}
-.tbl-wrap tbody tr{transition:background .1s;cursor:pointer}
-.tbl-wrap tbody tr:hover td{background:var(--surface2);color:var(--text)}
-.td-main{font-weight:500;color:var(--text)!important}
+/* ─── CLIENT PANEL ─── */
+.cl{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);display:flex;flex-direction:column;overflow-y:auto}
+.cl-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+.cl-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cl-head-title{font-weight:600;font-size:13px}
+.cl-more{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--text2);cursor:pointer;transition:all .12s}
+.cl-more:hover{background:var(--s3)}
+.cl-profile{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cl-ava{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0}
+.cl-pname{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;margin-bottom:2px}
+.cl-pbadge{font-size:9.5px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.cl-meta{font-size:11.5px;color:var(--text2);display:flex;flex-direction:column;gap:2px}
+.cl-link{color:var(--blue);font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:3px}
+.cl-sec{padding:12px 16px;border-bottom:1px solid var(--border)}
+.cl-sec-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.cl-add{width:22px;height:22px;border-radius:5px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text2);transition:all .12s}
+.cl-add:hover{background:var(--s4)}
+.cl-tags{display:flex;gap:5px;flex-wrap:wrap}
+.cl-tag{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:500}
+.tag-red{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.tag-blue{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.tag-amber{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+.cl-field{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.cl-fkey{font-size:11.5px;color:var(--text2)}
+.cl-fval{font-size:12px;font-weight:500}
+.cl-status{display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:12px;font-weight:500;cursor:pointer}
+.cl-status svg{color:var(--text2)}
+.cl-order{background:var(--s3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.cl-order-thumb{width:38px;height:38px;border-radius:8px;background:var(--s4);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cl-order-info{flex:1}
+.cl-order-name{font-size:12.5px;font-weight:600;margin-bottom:1px}
+.cl-order-sub{font-size:11px;color:var(--text2)}
+.cl-order-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.cl-order-price{margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.cl-order-total{font-weight:700;font-size:13px;color:var(--text)}
+.cl-order-btn{font-size:11px;color:var(--blue);cursor:pointer}
+.cl-quick{display:flex;gap:7px;flex-wrap:wrap}
+.cl-qbtn{display:flex;align-items:center;gap:6px;padding:7px 11px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r);font-size:11.5px;color:var(--text2);cursor:pointer;transition:all .12s;flex:1;white-space:nowrap;min-width:0}
+.cl-qbtn:hover{background:var(--s4);color:var(--text)}
 
-/* ── CHIPS ── */
-.chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
-.ch-green{background:var(--green-bg);color:var(--green)}
-.ch-red{background:var(--accent-bg);color:var(--accent)}
-.ch-blue{background:var(--blue-bg);color:var(--blue)}
-.ch-amber{background:var(--amber-bg);color:var(--amber)}
-.ch-purple{background:var(--purple-bg);color:var(--purple)}
-.ch-gray{background:var(--surface3);color:var(--text3)}
+/* ─── BOTTOM ROW ─── */
+.bottom-row{grid-column:1/4;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bottom-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px}
+.bc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.bc-title{font-weight:600;font-size:13.5px}
+.bc-right{display:flex;align-items:center;gap:7px}
+.bc-period{display:flex;align-items:center;gap:4px;padding:4px 9px;background:var(--s3);border:1px solid var(--border);border-radius:6px;font-size:11.5px;color:var(--text2);cursor:pointer}
+.bc-link{font-size:12px;color:var(--blue);cursor:pointer;display:flex;align-items:center;gap:3px}
+.bc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.bc-m{padding:0 16px 0 0;border-right:1px solid var(--border)}
+.bc-m:last-child{border:none;padding-right:0;padding-left:16px}
+.bc-m:first-child{padding-left:0}
+.bc-m-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px;letter-spacing:-0.5px}
+.bc-m-lbl{font-size:11.5px;color:var(--text2);margin-bottom:3px}
+.bc-m-trend{font-size:11px;font-weight:500;display:flex;align-items:center;gap:3px}
+.trend-up{color:var(--green)}
+.trend-dn{color:var(--red)}
+.bc-updated{font-size:10.5px;color:var(--text3);margin-top:12px;display:flex;align-items:center;gap:5px}
+.auto-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.auto-item:last-child{border:none;padding-bottom:0}
+.auto-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.auto-info{flex:1}
+.auto-name{font-size:12.5px;font-weight:600;margin-bottom:1px}
+.auto-sub{font-size:11px;color:var(--text2)}
+.auto-active{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--green-s);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.auto-count{font-size:13px;font-weight:700;color:var(--text);margin-right:4px}
+.auto-right{text-align:right}
+.auto-exec{font-size:10px;color:var(--text3)}
 
-/* ── CONVERSATIONS ── */
-.conv-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - var(--th) - 40px);background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-.conv-panel{border-right:1px solid var(--border);display:flex;flex-direction:column;min-width:0}
-.conv-ph{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.conv-ph-title{font-weight:600;font-size:13px}
-.conv-srch{padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
-.srch-wrap{position:relative}
-.srch-ico{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text3);pointer-events:none}
-.srch-inp{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px 6px 28px;font-size:11px;color:var(--text);outline:none;transition:border-color .12s}
-.srch-inp:focus{border-color:var(--border2)}
-.srch-inp::placeholder{color:var(--text3)}
-.conv-list{flex:1;overflow-y:auto}
-.ci{padding:11px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
-.ci:hover{background:var(--surface2)}
-.ci.active{background:var(--surface3)}
-.ci.active::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
-.ci-r1{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.ci-phone{font-size:11.5px;font-weight:600;color:var(--text);font-family:var(--mono)}
-.ci-time{font-size:9px;color:var(--text3)}
-.ci-prev{font-size:10.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:18px}
-.ci-unread{position:absolute;right:12px;bottom:10px;width:15px;height:15px;background:var(--accent);border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center}
-
-/* ── CHAT ── */
-.chat-area{display:flex;flex-direction:column;min-width:0}
-.chat-hdr{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--surface)}
-.chat-contact{display:flex;align-items:center;gap:10px}
-.chat-av{width:30px;height:30px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2);font-weight:600;flex-shrink:0}
-.chat-phone{font-size:12.5px;font-weight:600;font-family:var(--mono)}
-.chat-st{font-size:10px;color:var(--green)}
-.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
-.msg-row{display:flex}
-.msg-row.usr{justify-content:flex-start}
-.msg-row.agt{justify-content:flex-end}
-.msg-bbl{max-width:70%;padding:8px 12px;border-radius:10px;font-size:11.5px;line-height:1.5}
-.msg-row.usr .msg-bbl{background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:2px}
-.msg-row.agt .msg-bbl{background:var(--accent);color:#fff;border-bottom-right-radius:2px}
-.msg-meta{font-size:9px;margin-top:3px;color:var(--text3)}
-.msg-row.agt .msg-meta{text-align:right;color:rgba(255,255,255,.55)}
-.msg-sep{text-align:center;font-size:9px;color:var(--text3);padding:4px 0;display:flex;align-items:center;gap:8px}
-.msg-sep::before,.msg-sep::after{content:'';flex:1;height:1px;background:var(--border)}
-.chat-inp-wrap{padding:10px 14px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:6px;align-items:flex-end;flex-shrink:0}
-.chat-ta{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 11px;font-size:11.5px;color:var(--text);resize:none;outline:none;min-height:36px;max-height:100px;transition:border-color .12s;line-height:1.45}
-.chat-ta:focus{border-color:var(--border2)}
-.chat-ta::placeholder{color:var(--text3)}
-.chat-send{width:36px;height:36px;background:var(--accent);border:none;border-radius:7px;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;flex-shrink:0}
-.chat-send:hover{background:#c9001a}
-.empty-st{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3)}
-.e-ico{font-size:32px;opacity:.3}
-.e-title{font-size:13px;font-weight:600;color:var(--text2)}
-.e-sub{font-size:11px}
-
-/* ── ESCALADAS ── */
-.esc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:10px;transition:border-color .15s;position:relative;overflow:hidden}
-.esc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
-.esc-card:hover{border-color:var(--border2)}
-.esc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px}
-.esc-info{}
-.esc-phone{font-size:13px;font-weight:600;font-family:var(--mono);margin-bottom:2px}
-.esc-time{font-size:10px;color:var(--text3)}
-.esc-body{background:var(--surface2);border-radius:var(--r);padding:12px;margin-bottom:12px;font-size:11.5px;line-height:1.6;border-left:3px solid var(--accent);white-space:pre-line}
-.esc-actions{display:flex;gap:6px;flex-wrap:wrap}
-.esc-templates{margin-top:10px;display:none}
-.esc-templates.open{display:block}
-.tpl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
-.tpl-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;text-align:left;cursor:pointer;font-size:10.5px;color:var(--text2);transition:all .12s;line-height:1.4}
-.tpl-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--border2)}
-.esc-reply-area{margin-top:10px;display:none}
-.esc-reply-area.open{display:block}
-.esc-ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-size:11.5px;color:var(--text);resize:none;outline:none;height:80px;transition:border-color .12s;margin-bottom:8px}
-.esc-ta:focus{border-color:var(--border2)}
-
-/* ── PEDIDOS ── */
-.pedido-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:10px}
-.ped-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.ped-id{font-size:10px;font-family:var(--mono);color:var(--text3)}
-.ped-cliente{font-size:13px;font-weight:600}
-.ped-body{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
-.ped-field{}
-.ped-field-lbl{font-size:10px;color:var(--text3);margin-bottom:2px}
-.ped-field-val{font-size:12px;font-weight:500;color:var(--text)}
-.ped-actions{display:flex;gap:6px}
-.status-flow{display:flex;gap:0;margin-bottom:12px}
-.sf-step{flex:1;text-align:center;padding:6px;font-size:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text3)}
-.sf-step:first-child{border-radius:6px 0 0 6px}
-.sf-step:last-child{border-radius:0 6px 6px 0}
-.sf-step.done{background:var(--green-bg);color:var(--green);border-color:rgba(0,201,139,.2);font-weight:600}
-.sf-step.current{background:var(--accent-bg);color:var(--accent);border-color:rgba(232,0,45,.2);font-weight:600}
-
-/* ── SEGUIMIENTOS ── */
-.seg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
-.seg-card.urgent{border-color:rgba(232,0,45,.25)}
-.seg-av{width:36px;height:36px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0}
-.seg-info{flex:1;min-width:0}
-.seg-phone{font-size:12px;font-weight:600;font-family:var(--mono)}
-.seg-last{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.seg-time{font-size:10px;color:var(--text3);margin-top:1px}
-.seg-actions{display:flex;gap:5px;flex-shrink:0}
-
-/* ── PIPELINE ── */
-.pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:start}
-.pipe-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-.pipe-hdr{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between}
-.pipe-hdr-title{font-size:11px;font-weight:600}
-.pipe-count{font-size:10px;color:var(--text3)}
-.pipe-body{padding:8px}
-.pipe-card{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .12s}
-.pipe-card:hover{border-color:var(--border2);background:var(--surface3)}
-.pipe-card:last-child{margin-bottom:0}
-.pc-phone{font-size:11px;font-weight:600;font-family:var(--mono);margin-bottom:2px}
-.pc-prod{font-size:10px;color:var(--text2)}
-.pc-amount{font-size:11px;font-weight:600;color:var(--green);margin-top:4px}
-.pc-time{font-size:9px;color:var(--text3)}
-
-/* ── TEMPLATES ── */
-.tpl-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.tpl-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;cursor:pointer;transition:all .12s}
-.tpl-item:hover{border-color:var(--border2);background:var(--surface2)}
-.tpl-tag{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
-.tpl-title{font-size:12px;font-weight:600;margin-bottom:4px}
-.tpl-preview{font-size:11px;color:var(--text2);line-height:1.4;white-space:pre-line}
-.tpl-footer{display:flex;justify-content:flex-end;margin-top:8px;gap:5px}
-
-/* ── CAMPAIGNS ── */
-.camp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:10px}
-.camp-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:10px}
-.camp-name{font-size:13.5px;font-weight:600;margin-bottom:2px}
-.camp-id{font-size:10px;color:var(--text3);font-family:var(--mono)}
-.camp-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.cm{background:var(--surface2);border-radius:7px;padding:9px 11px}
-.cm-val{font-size:16px;font-weight:700;margin-bottom:1px;font-variant-numeric:tabular-nums}
-.cm-lbl{font-size:9px;color:var(--text3)}
-
-/* ── SETTINGS ── */
-.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.cfg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px}
-.cfg-title{font-size:13px;font-weight:600;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid var(--border)}
-.fr{margin-bottom:12px}
-.fl{display:block;font-size:10.5px;font-weight:500;color:var(--text2);margin-bottom:4px}
-.fi,.fs{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11.5px;color:var(--text);outline:none;transition:border-color .12s}
-.fi:focus,.fs:focus{border-color:var(--border2)}
-.tog-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-.tog-row:last-child{border-bottom:none}
-.tog-name{font-size:12px;font-weight:500}
-.tog-desc{font-size:10px;color:var(--text3);margin-top:1px}
-.toggle{width:34px;height:18px;border-radius:9px;background:var(--surface3);position:relative;cursor:pointer;border:1px solid var(--border2);transition:background .18s;flex-shrink:0}
-.toggle.on{background:var(--green);border-color:var(--green)}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .18s}
-.toggle.on::after{transform:translateX(16px)}
-.sys-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-.sys-row:last-child{border-bottom:none}
-
-/* ── LOADING / EMPTY ── */
-.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:28px;color:var(--text3);font-size:11.5px}
-.spinner{width:13px;height:13px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-msg{padding:32px;text-align:center;font-size:11.5px;color:var(--text3)}
-
-/* ── OVERLAY / MODAL ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150}
-.overlay.open{display:block}
-.modal-wrap{display:none;position:fixed;inset:0;z-index:300;align-items:center;justify-content:center}
-.modal-wrap.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);padding:22px;width:440px;max-width:90vw;max-height:90vh;overflow-y:auto}
-.modal-title{font-size:15px;font-weight:600;margin-bottom:16px}
-.modal-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:16px}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:18px;right:18px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:11px 14px;font-size:11.5px;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s ease;max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-.toast.show{transform:none;opacity:1}
-.toast-title{font-weight:600;margin-bottom:1px}
-.toast-msg{color:var(--text2)}
-
-/* ── RESPONSIVE ── */
-@media(max-width:1100px){
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .camp-metrics{grid-template-columns:repeat(3,1fr)}
-  .pipeline{grid-template-columns:repeat(3,1fr)}
-  .cfg-grid{grid-template-columns:1fr}
-  .tpl-list{grid-template-columns:1fr}
-}
-@media(max-width:800px){
-  :root{--sw:240px}
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.5)}
-  .overlay.open{display:block}
-  .main{margin-left:0}
-  .t-menu{display:flex}
-  .view{padding:12px}
-  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .conv-layout{grid-template-columns:1fr;height:auto;border-radius:var(--r)}
-  .conv-panel{border-right:none;border-bottom:1px solid var(--border);max-height:40vh}
-  .chat-area{height:55vh}
-  .pipeline{grid-template-columns:1fr 1fr}
-  .ped-body{grid-template-columns:repeat(2,1fr)}
-  .hide-mob{display:none}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr}
-  .pipeline{grid-template-columns:1fr}
-  .tpl-grid{grid-template-columns:1fr}
-}
+/* ─── SPARKLINE SVG ─── */
+.sparkline path{fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="shell">
 
-<!-- OVERLAY -->
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="s-logo">
-    <div class="s-mark">A</div>
-    <div>
-      <div class="s-name">Angel Panel</div>
-      <div class="s-sub">Across Sports Perú</div>
+<!-- ── SIDEBAR ── -->
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">A</div>
+    <div class="sb-brand-text">
+      <div class="sb-name">ACROS Agent</div>
     </div>
+    <div class="sb-collapse">◀</div>
   </div>
-  <nav class="s-nav">
-    <div class="nav-sec">
-      <div class="nav-lbl">Principal</div>
-      <button class="nav-btn active" onclick="go('overview',this)"><span class="nav-ico">▦</span> Overview</button>
-      <button class="nav-btn" onclick="go('conversations',this)">
-        <span class="nav-ico">💬</span> Conversaciones
-        <span class="live-dot"></span>
-      </button>
+
+  <nav class="sb-nav">
+    <div class="sb-item on">
+      <span class="ico">⌂</span> Inicio
     </div>
-    <div class="nav-sec">
-      <div class="nav-lbl">Ventas</div>
-      <button class="nav-btn" onclick="go('escaladas',this)">
-        <span class="nav-ico">🔔</span> Escaladas
-        <span class="n-badge" id="esc-badge" style="display:none">0</span>
-      </button>
-      <button class="nav-btn" onclick="go('pedidos',this)"><span class="nav-ico">📦</span> Pedidos</button>
-      <button class="nav-btn" onclick="go('seguimientos',this)"><span class="nav-ico">⏰</span> Seguimientos</button>
-      <button class="nav-btn" onclick="go('pipeline',this)"><span class="nav-ico">📈</span> Pipeline</button>
-      <button class="nav-btn" onclick="go('templates',this)"><span class="nav-ico">⚡</span> Respuestas rápidas</button>
+    <div class="sb-item">
+      <span class="ico">📥</span> Bandeja
+      <span class="sb-badge">8</span>
     </div>
-    <div class="nav-sec">
-      <div class="nav-lbl">Marketing</div>
-      <button class="nav-btn" onclick="go('campaigns',this)"><span class="nav-ico">📊</span> Campañas Meta</button>
+    <div class="sb-item">
+      <span class="ico">💬</span> Conversaciones
     </div>
-    <div class="nav-sec">
-      <div class="nav-lbl">Sistema</div>
-      <button class="nav-btn" onclick="go('settings',this)"><span class="nav-ico">⚙</span> Configuración</button>
+    <div class="sb-item">
+      <span class="ico">👤</span> Clientes
+    </div>
+    <div class="sb-item">
+      <span class="ico">⚡</span> Automatizaciones
+    </div>
+    <div class="sb-item">
+      <span class="ico">📦</span> Productos
+    </div>
+    <div class="sb-item">
+      <span class="ico">📊</span> Métricas
+    </div>
+    <div class="sb-item">
+      <span class="ico">⚙</span> Configuración
     </div>
   </nav>
-  <div class="s-footer">
-    <div class="s-status"><div class="s-status-dot"></div><div class="s-status-txt">Angel activo · en línea</div></div>
-  </div>
-</aside>
 
-<!-- MAIN -->
-<div class="main">
-<header class="topbar">
-  <button class="t-menu" onclick="toggleSidebar()">☰</button>
-  <div class="t-title" id="t-title">Overview</div>
-  <div class="t-actions">
-    <button class="btn btn-sm btn-ghost hide-mob" onclick="refreshAll()">↻ Actualizar</button>
-    <button class="btn btn-sm btn-primary" onclick="go('escaladas',null)">🔔 Escaladas</button>
-  </div>
-</header>
-
-<!-- ════════ OVERVIEW ════════ -->
-<div class="view active" id="view-overview">
-  <div class="stats-grid">
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-red">💬</div>Conversaciones hoy</div><div class="stat-val" id="ov-conv">—</div><div class="stat-meta">mensajes recibidos</div></div>
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-red">🔔</div>Escaladas pendientes</div><div class="stat-val" id="ov-esc" style="color:var(--accent)">—</div><div class="stat-meta">requieren tu atención</div></div>
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-amber">📦</div>Pedidos activos</div><div class="stat-val" id="ov-ped">—</div><div class="stat-meta">en proceso</div></div>
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-blue">📊</div>Gasto Meta hoy</div><div class="stat-val" id="ov-gasto">—</div><div class="stat-meta">S/. presupuesto diario</div></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-hdr"><div><div class="sec-title">Escaladas recientes</div><div class="sec-sub">Conversaciones que requieren tu intervención</div></div><button class="btn btn-sm" onclick="go('escaladas',null)">Ver todas →</button></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Cliente</th><th>Producto</th><th>Zona</th><th>Estado</th><th>Hace</th></tr></thead><tbody id="ov-esc-table"><tr><td colspan="5"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr></tbody></table></div>
-  </div>
-
-  <div class="sec">
-    <div class="sec-hdr"><div><div class="sec-title">Pedidos recientes</div></div><button class="btn btn-sm" onclick="go('pedidos',null)">Ver todos →</button></div>
-    <div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Cliente</th><th>Producto</th><th>Total</th><th>Estado</th></tr></thead><tbody id="ov-ped-table"><tr><td colspan="5"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr></tbody></table></div>
+  <div class="sb-footer">
+    <div class="sb-agent">
+      <div class="sb-agent-row">
+        <div class="dot-green"></div>
+        <span class="sb-agent-name">Agente activo</span>
+      </div>
+      <div class="sb-agent-sub">IA de ventas ACROS<br>Canal: WhatsApp</div>
+      <div class="sb-agent-btn">◉ Ver estado del agente</div>
+    </div>
+    <div class="sb-brand2">
+      <div class="sb-logo2">A</div>
+      <div class="sb-brand2-text">
+        <div class="sb-brand2-name">ACROS SPORTS</div>
+        <div class="sb-brand2-plan">Plan Profesional</div>
+      </div>
+      <span style="margin-left:auto;color:var(--text3);font-size:16px;cursor:pointer">⌄</span>
+    </div>
   </div>
 </div>
 
-<!-- ════════ CONVERSATIONS ════════ -->
-<div class="view" id="view-conversations">
-  <div class="conv-layout">
-    <div class="conv-panel">
-      <div class="conv-ph">
-        <div class="conv-ph-title">Chats</div>
-        <span class="chip ch-green" id="conv-chip">0</span>
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="t-search">
+    <span style="color:var(--text3);font-size:14px">🔍</span>
+    <input type="text" placeholder="Buscar conversaciones, clientes, pedidos...">
+    <span class="t-search-key">⌘K</span>
+  </div>
+  <div class="t-right">
+    <div class="t-workspace">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Workspace ACROS
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="t-active">
+      <div class="t-active-dot"></div>
+      Agente activo
+    </div>
+    <div class="t-icon">
+      🔔
+      <div class="t-notif-badge">3</div>
+    </div>
+    <div class="t-avatar">AS</div>
+  </div>
+</div>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-top">
+        <div>
+          <div class="kpi-label">Conversaciones hoy</div>
+        </div>
+        <div class="kpi-icon" style="background:rgba(59,130,246,.12)">💬</div>
       </div>
-      <div class="conv-srch">
-        <div class="srch-wrap">
-          <span class="srch-ico">🔍</span>
-          <input class="srch-inp" type="text" placeholder="Buscar número..." oninput="filterConvs(this.value)">
+      <div class="kpi-val">128</div>
+      <div class="kpi-trend up">▲ 18% vs ayer</div>
+      <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+        <path d="M0 28 L10 24 L20 26 L30 18 L40 20 L50 14 L60 16 L70 10 L80 8" stroke="#3b82f6" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top">
+        <div>
+          <div class="kpi-label">Leads pendientes</div>
+        </div>
+        <div class="kpi-icon" style="background:rgba(34,197,94,.12)">👥</div>
+      </div>
+      <div class="kpi-val">34</div>
+      <div class="kpi-trend down">▼ 8% vs ayer</div>
+      <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+        <path d="M0 12 L10 16 L20 14 L30 20 L40 18 L50 22 L60 20 L70 26 L80 28" stroke="#22c55e" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top">
+        <div>
+          <div class="kpi-label">Tiempo de respuesta</div>
+        </div>
+        <div class="kpi-icon" style="background:rgba(139,92,246,.12)">⏱</div>
+      </div>
+      <div class="kpi-val" style="font-size:22px">1m 42s</div>
+      <div class="kpi-trend down">▼ 15% vs ayer</div>
+      <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+        <path d="M0 24 L10 22 L20 26 L30 20 L40 18 L50 14 L60 16 L70 12 L80 10" stroke="#8b5cf6" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top">
+        <div>
+          <div class="kpi-label">Ventas del día</div>
+        </div>
+        <div class="kpi-icon" style="background:rgba(245,158,11,.12)">🛍</div>
+      </div>
+      <div class="kpi-val" style="font-size:22px">S/ 4,568</div>
+      <div class="kpi-trend up">▲ 22% vs ayer</div>
+      <svg class="kpi-sparkline" width="80" height="36" viewBox="0 0 80 36">
+        <path d="M0 28 L10 26 L20 22 L30 24 L40 18 L50 16 L60 14 L70 10 L80 8" stroke="#f59e0b" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- CONV LIST -->
+    <div class="cv">
+      <div class="cv-head">
+        <div class="cv-head-row">
+          <div class="cv-title">Conversaciones</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div class="cv-filter">
+              Todas (8)
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="cv-ico">✏</div>
+          </div>
+        </div>
+        <div class="cv-search">
+          <span class="cv-search-ico">🔍</span>
+          <input type="text" placeholder="Buscar conversaciones">
         </div>
       </div>
-      <div class="conv-list" id="convList"><div class="loading"><div class="spinner"></div></div></div>
+      <div class="cv-list" id="cvList">
+        <!-- items injected by JS -->
+      </div>
+      <div class="cv-more">
+        <span>Ver todas las conversaciones</span>
+        <span>→</span>
+      </div>
     </div>
-    <div class="chat-area" id="chatArea">
-      <div class="empty-st"><div class="e-ico">💬</div><div class="e-title">Selecciona una conversación</div><div class="e-sub">O espera mensajes entrantes</div></div>
+
+    <!-- CHAT -->
+    <div class="chat">
+      <div class="chat-head">
+        <div class="chat-ava" id="chatAva">JM</div>
+        <div class="chat-info">
+          <div class="chat-name" id="chatName">
+            Juan Martínez
+            <span class="chat-badge">Lead caliente</span>
+          </div>
+          <div class="chat-sub">Canal: WhatsApp</div>
+        </div>
+        <div class="chat-head-icons">
+          <div class="chat-ico">🏷</div>
+          <div class="chat-ico">ℹ</div>
+          <div class="chat-ico">⋮</div>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="chat-input-wrap">
+        <div class="chat-input-box">
+          <textarea id="msgTa" placeholder="Escribe un mensaje..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+            oninput="this.style.height='';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+          <div class="chat-input-icons">
+            <div class="ci-icon">📎</div>
+            <div class="ci-icon">😊</div>
+            <div class="ci-icon">⚡</div>
+          </div>
+          <div class="chat-send-btn" onclick="sendMsg()">Enviar</div>
+        </div>
+        <div class="chat-actions">
+          <div class="ca-btn ca-reply">↩ Responder</div>
+          <div class="ca-btn ca-default">👤 Asignar</div>
+          <div class="ca-btn ca-default">📅 Seguimiento</div>
+          <div class="ca-btn ca-default">✓ Marcar como cerrado</div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- ════════ ESCALADAS ════════ -->
-<div class="view" id="view-escaladas">
-  <div class="sec-hdr" style="margin-bottom:16px">
-    <div><div class="sec-title">Escaladas pendientes</div><div class="sec-sub">Conversaciones donde Angel necesita tu ayuda</div></div>
-    <button class="btn btn-sm" onclick="loadEscaladas()">↻ Actualizar</button>
-  </div>
-  <div id="esc-container"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
-</div>
+    <!-- CLIENT PANEL -->
+    <div class="cl">
+      <div class="cl-head">
+        <div class="cl-head-row">
+          <div class="cl-head-title">Datos del cliente</div>
+          <div class="cl-more">⋯</div>
+        </div>
+        <div class="cl-profile">
+          <div class="cl-ava">JM</div>
+          <div>
+            <div class="cl-pname">
+              Juan Martínez
+              <span class="cl-pbadge">Cliente potencial</span>
+            </div>
+            <div class="cl-meta">
+              <span>📞 +51 960 293 996</span>
+              <span>📍 Lima, Perú</span>
+            </div>
+          </div>
+        </div>
+        <div class="cl-link">Ver perfil completo →</div>
+      </div>
 
-<!-- ════════ PEDIDOS ════════ -->
-<div class="view" id="view-pedidos">
-  <div class="sec-hdr" style="margin-bottom:16px">
-    <div><div class="sec-title">Pedidos</div><div class="sec-sub">Gestiona los pedidos de tus clientes</div></div>
-    <button class="btn btn-sm btn-primary" onclick="openNewPedido()">+ Nuevo pedido</button>
-  </div>
-  <div id="ped-container"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
-</div>
+      <div class="cl-sec">
+        <div class="cl-sec-title">
+          Etiquetas
+          <div class="cl-add">+</div>
+        </div>
+        <div class="cl-tags">
+          <span class="cl-tag tag-red">Tatami</span>
+          <span class="cl-tag tag-blue">Artes Marciales</span>
+          <span class="cl-tag tag-amber">Lead caliente</span>
+        </div>
+      </div>
 
-<!-- ════════ SEGUIMIENTOS ════════ -->
-<div class="view" id="view-seguimientos">
-  <div class="sec-hdr" style="margin-bottom:16px">
-    <div><div class="sec-title">Seguimientos</div><div class="sec-sub">Clientes que no han respondido — actívalos con un mensaje</div></div>
-    <button class="btn btn-sm" onclick="loadSeguimientos()">↻ Actualizar</button>
-  </div>
-  <div id="seg-container"><div class="loading"><div class="spinner"></div> Cargando...</div></div>
-</div>
+      <div class="cl-sec">
+        <div class="cl-sec-title">Estado del lead</div>
+        <div class="cl-field">
+          <span class="cl-fkey">Estado actual</span>
+          <div class="cl-status">
+            Contactado
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
 
-<!-- ════════ PIPELINE ════════ -->
-<div class="view" id="view-pipeline">
-  <div class="sec-hdr" style="margin-bottom:16px">
-    <div><div class="sec-title">Pipeline de ventas</div><div class="sec-sub">Estado de todas las conversaciones activas</div></div>
-  </div>
-  <div class="pipeline" id="pipeline-board">
-    <div class="pipe-col"><div class="pipe-hdr"><div class="pipe-hdr-title">👋 Contacto</div><span class="pipe-count" id="pc-0">0</span></div><div class="pipe-body" id="pb-0"></div></div>
-    <div class="pipe-col"><div class="pipe-hdr"><div class="pipe-hdr-title">🤔 Interesado</div><span class="pipe-count" id="pc-1">0</span></div><div class="pipe-body" id="pb-1"></div></div>
-    <div class="pipe-col"><div class="pipe-hdr"><div class="pipe-hdr-title">💰 Listo pagar</div><span class="pipe-count" id="pc-2">0</span></div><div class="pipe-body" id="pb-2"></div></div>
-    <div class="pipe-col"><div class="pipe-hdr"><div class="pipe-hdr-title">📦 En camino</div><span class="pipe-count" id="pc-3">0</span></div><div class="pipe-body" id="pb-3"></div></div>
-    <div class="pipe-col"><div class="pipe-hdr"><div class="pipe-hdr-title">✅ Cerrado</div><span class="pipe-count" id="pc-4">0</span></div><div class="pipe-body" id="pb-4"></div></div>
-  </div>
-</div>
+      <div class="cl-sec">
+        <div class="cl-sec-title">Último pedido</div>
+        <div class="cl-order">
+          <div class="cl-order-thumb">🥋</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+              <div class="cl-order-name">Tatami 3 cm</div>
+              <span class="cl-order-status">Entregado</span>
+            </div>
+            <div class="cl-order-sub">10 m² • Rojo/Azul • 12/05/2024</div>
+          </div>
+        </div>
+        <div class="cl-order-price">
+          <span style="color:var(--text2);font-size:12px">Total:</span>
+          <span class="cl-order-total">S/ 450.00</span>
+          <span class="cl-order-btn">Ver pedido →</span>
+        </div>
+      </div>
 
-<!-- ════════ TEMPLATES ════════ -->
-<div class="view" id="view-templates">
-  <div class="sec-hdr" style="margin-bottom:16px">
-    <div><div class="sec-title">Respuestas rápidas</div><div class="sec-sub">Mensajes predefinidos para responder en segundos</div></div>
-    <button class="btn btn-sm btn-primary" onclick="openAddTemplate()">+ Agregar</button>
-  </div>
-  <div class="tpl-list" id="tpl-container"></div>
-</div>
-
-<!-- ════════ CAMPAIGNS ════════ -->
-<div class="view" id="view-campaigns">
-  <div class="stats-grid">
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-amber">💸</div>Gasto total</div><div class="stat-val" id="c-gasto">—</div><div class="stat-meta">S/. acumulado</div></div>
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-blue">👁</div>Impresiones</div><div class="stat-val" id="c-impr">—</div><div class="stat-meta">alcance total</div></div>
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-green">💬</div>Conversaciones</div><div class="stat-val" id="c-convs">—</div><div class="stat-meta">iniciadas por ads</div></div>
-    <div class="stat"><div class="stat-lbl"><div class="stat-ico ico-red">📉</div>Costo/conv.</div><div class="stat-val" id="c-cpc">—</div><div class="stat-meta">S/. promedio</div></div>
-  </div>
-  <div class="sec">
-    <div class="sec-hdr"><div><div class="sec-title">Campañas</div><div class="sec-sub" id="c-sync">—</div></div><button class="btn btn-sm" onclick="loadCampaigns()">↻ Sincronizar Meta</button></div>
-    <div id="camp-container"><div class="loading"><div class="spinner"></div></div></div>
-  </div>
-</div>
-
-<!-- ════════ SETTINGS ════════ -->
-<div class="view" id="view-settings">
-  <div class="sec-hdr" style="margin-bottom:16px"><div class="sec-title">Configuración</div></div>
-  <div class="cfg-grid">
-    <div class="cfg-card">
-      <div class="cfg-title">Servidor Angel</div>
-      <div class="fr"><label class="fl">URL del servidor Railway</label><input class="fi" id="cfg-url" placeholder="https://angel-across-sports-production.up.railway.app"></div>
-      <div class="fr"><label class="fl">Contraseña del panel</label><input class="fi" type="password" id="cfg-pass" placeholder="••••••••"></div>
-      <div class="fr"><label class="fl">ID Cuenta Publicitaria Meta</label><input class="fi" id="cfg-adaccount" placeholder="act_xxxxxxxxxx"></div>
-      <button class="btn btn-primary btn-sm" onclick="saveConfig()">Guardar</button>
+      <div class="cl-sec" style="border:none">
+        <div class="cl-sec-title" style="margin-bottom:9px">Acciones rápidas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div class="cl-qbtn">📋 Crear cotización</div>
+          <div class="cl-qbtn">📦 Enviar catálogo</div>
+          <div class="cl-qbtn" style="grid-column:1/-1">📝 Agregar nota</div>
+        </div>
+      </div>
     </div>
-    <div class="cfg-card">
-      <div class="cfg-title">Comportamiento de Angel</div>
-      <div class="tog-row"><div><div class="tog-name">Respuesta automática</div><div class="tog-desc">Angel responde todos los mensajes</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="tog-row"><div><div class="tog-name">Alertas de escalada</div><div class="tog-desc">Notificación cuando Angel escala</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <div class="tog-row"><div><div class="tog-name">Modo silencio</div><div class="tog-desc">Pausar respuestas automáticas</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-      <div class="tog-row"><div><div class="tog-name">Seguimiento automático</div><div class="tog-desc">Angel hace seguimiento a las 24h</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+      <!-- Rendimiento -->
+      <div class="bottom-card">
+        <div class="bc-head">
+          <div class="bc-title">Rendimiento del agente</div>
+          <div class="bc-right">
+            <div class="bc-period">
+              Hoy
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="bc-metrics">
+          <div class="bc-m">
+            <div class="bc-m-lbl">Conversaciones</div>
+            <div class="bc-m-val">128</div>
+            <div class="bc-m-trend trend-up">▲ 18%</div>
+          </div>
+          <div class="bc-m">
+            <div class="bc-m-lbl">Respuestas</div>
+            <div class="bc-m-val">96</div>
+            <div class="bc-m-trend trend-up">▲ 12%</div>
+          </div>
+          <div class="bc-m">
+            <div class="bc-m-lbl">Tiempo respuesta</div>
+            <div class="bc-m-val" style="font-size:18px">1m 42s</div>
+            <div class="bc-m-trend trend-dn">▼ 15%</div>
+          </div>
+          <div class="bc-m" style="border:none">
+            <div class="bc-m-lbl">Convs. cerradas</div>
+            <div class="bc-m-val">32</div>
+            <div class="bc-m-trend trend-up">▲ 14%</div>
+          </div>
+        </div>
+        <div class="bc-updated">↻ Datos actualizados hace 5 minutos</div>
+      </div>
+
+      <!-- Automatizaciones -->
+      <div class="bottom-card">
+        <div class="bc-head">
+          <div class="bc-title">Automatizaciones activas</div>
+          <div class="bc-link">Ver todas →</div>
+        </div>
+        <div id="autoList"></div>
+      </div>
     </div>
-    <div class="cfg-card">
-      <div class="cfg-title">Estado del sistema</div>
-      <div id="sys-status"><div class="loading"><div class="spinner"></div></div></div>
-    </div>
-    <div class="cfg-card">
-      <div class="cfg-title">WhatsApp</div>
-      <div class="fr"><label class="fl">Número activo</label><input class="fi" value="+51 960 293 996" readonly></div>
-      <div class="fr"><label class="fl">Phone Number ID</label><input class="fi" value="1108492162350437" readonly style="font-family:var(--mono)"></div>
-      <div class="fr"><label class="fl">Estado conexión</label><div style="margin-top:4px"><span class="chip ch-green">● Conectado</span></div></div>
-    </div>
+
   </div>
 </div>
-
-</div><!-- /main -->
-</div><!-- /app -->
-
-<!-- TOAST -->
-<div class="toast" id="toast"><div class="toast-title" id="t-ttl"></div><div class="toast-msg" id="t-msg"></div></div>
+</div>
 
 <script>
-/* ══════════════════════════════════════
-   CONFIG & STATE
-══════════════════════════════════════ */
-const CFG = {
-  url:       localStorage.getItem('angel_url') || 'https://angel-across-sports-production.up.railway.app',
-  pass:      localStorage.getItem('angel_pass') || 'acrosssports2024',
-  adAccount: localStorage.getItem('angel_ad')   || '',
-};
+const SERVER = 'https://angel-across-sports-production.up.railway.app';
+const PASS   = 'acrosssports2024';
 
-let allConvs   = {};
-let activePhone= null;
-let escaladas  = JSON.parse(localStorage.getItem('escaladas') || '[]');
-let pedidos    = JSON.parse(localStorage.getItem('pedidos')   || '[]');
-let templates  = JSON.parse(localStorage.getItem('templates') || 'null') || defaultTemplates();
-let pollTimer  = null;
+const CONVS_DEMO = [
+  {id:'51960001111',name:'Juan Martínez',preview:'¿Tienen tatami de 4 cm en stock?',cat:'Tatami 4 cm',time:'11:24',unread:1,color:'#3b82f6',on:true},
+  {id:'51960002222',name:'Lucía Castillo',preview:'Necesito cotización de trofeos',cat:'Trofeos • Mayorista',time:'11:18',unread:2,color:'#8b5cf6'},
+  {id:'51960003333',name:'Diego Gómez',preview:'Consulta por mancuernas',cat:'Mancuernas',time:'11:05',unread:0,color:'#22c55e'},
+  {id:'51960004444',name:'Federico Sosa',preview:'¿Hacen envíos al interior?',cat:'Envíos',time:'10:47',unread:1,color:'#f59e0b'},
+  {id:'51960005555',name:'María Belén',preview:'Quiero saber precios mayoristas',cat:'Mayorista',time:'10:30',unread:0,color:'#06b6d4'},
+];
 
-function defaultTemplates() {
-  return [
-    { id:1, tag:'Entrega Lima', title:'Sistema contra entrega Lima', color:'ch-blue',
-      body:`Nosotros contamos con un sistema de contra entrega aquí en Lima 🏍️
+const MSGS_DEMO = [
+  {role:'user',name:'Juan Martínez',text:'Hola, buen día. ¿Tienen tatami de 4 cm en stock?\nEstoy armando un dojo y necesito para esta semana.',time:'11:24'},
+  {role:'assistant',text:'¡Hola Juan! 👋 Sí, tenemos tatami de 4 cm en stock.\nDisponibles en color rojo/azul y negro/amarillo.\n¿Necesitás para un uso profesional o amateur?',time:'11:25'},
+  {role:'user',name:'Juan Martínez',text:'Para uso profesional, 20 m² aprox.',time:'11:26'},
+  {role:'assistant',text:'Perfecto. Te paso opciones y precios:\n• Tatami 4 cm profesional (rojo/azul): S/63 por m²\n• Tatami 4 cm profesional (negro/azul): S/63 por m²\n¿Quieres que te arme una cotización?',time:'11:27'},
+];
 
-Lo único que pedimos por adelantado es el costo del delivery, que no está incluido en el precio del producto. El producto lo pagas una vez tengas el pedido en tu domicilio, cuando llegue el motorizado.
+const AUTOS = [
+  {icon:'👋',bg:'rgba(34,197,94,.1)',name:'Bienvenida nuevos contactos',sub:'Enviar mensaje de bienvenida',count:'1,256'},
+  {icon:'💼',bg:'rgba(245,158,11,.1)',name:'Seguimiento de cotizaciones',sub:'Recordar cotización después de 24h',count:'842'},
+  {icon:'🛒',bg:'rgba(59,130,246,.1)',name:'Carrito abandonado',sub:'Reactivar leads sin respuesta',count:'567'},
+];
 
-¿Te parece bien? ¿Me puedes compartir tu ubicación para calcular el delivery?` },
-    { id:2, tag:'Entrega Provincia', title:'Sistema contra entrega Provincia', color:'ch-green',
-      body:`Para envíos a provincia tenemos un sistema similar al de Lima para que tengas total confianza 👍
-
-Lo único que pedimos adelantado es el 10% del valor del producto. Con eso hacemos el envío por Shalom. Te enviamos la foto del voucher para que veas que tu pedido está en camino.
-
-Cuando vayas a recogerlo a la agencia, verificas que esté en buen estado y recién nos haces el pago del 90% restante. ¿Te parece?` },
-    { id:3, tag:'Yape', title:'Datos de pago Yape', color:'ch-purple',
-      body:`Perfecto, los datos para el Yape son:
-
-📲 Número: 960293996
-👤 Nombre: Luis - Across Sports Perú
-
-Una vez hagas el pago, por favor envíame la foto del voucher para confirmar y coordinar la entrega 🙌` },
-    { id:4, tag:'Seguimiento', title:'Seguimiento 24h', color:'ch-amber',
-      body:`Hola! Te escribo de Across Sports Perú 👋
-
-Quedamos conversando sobre [PRODUCTO]. ¿Pudiste ver la información? Cualquier consulta adicional con gusto te ayudo 😊` },
-    { id:5, tag:'Anti-estafa', title:'Respuesta a desconfianza', color:'ch-red',
-      body:`Entiendo tu preocupación, es algo muy válido con el e-commerce hoy en día 💯
-
-Por eso trabajamos con un sistema de contra entrega: el costo del producto NO se paga adelantado. Solo el delivery. El producto lo pagas cuando lo tengas en tus manos.
-
-Si es provincia, el adelanto es solo el 10% y te mandamos foto del voucher de la agencia Shalom. Con código de protección para que puedas verificar tu paquete antes de pagar el resto.
-
-¿Alguna otra duda?` },
-    { id:6, tag:'Disponibilidad', title:'Confirmación de stock', color:'ch-green',
-      body:`¡Claro que sí! Tenemos disponibilidad del [PRODUCTO] 🏆
-
-Precio: S/.[PRECIO]
-El delivery se coordina aparte según tu ubicación.
-
-¿Es para Lima o provincia?` },
-  ];
-}
-
-/* ══════════════════════════════════════
-   NAV
-══════════════════════════════════════ */
-const TITLES = {overview:'Overview',conversations:'Conversaciones',escaladas:'Escaladas',pedidos:'Pedidos',seguimientos:'Seguimientos',pipeline:'Pipeline',templates:'Respuestas rápidas',campaigns:'Campañas Meta',settings:'Configuración'};
-
-function go(id, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const v = document.getElementById('view-'+id);
-  if(v) v.classList.add('active');
-  if(el) el.classList.add('active');
-  else {
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      if(b.getAttribute('onclick')?.includes("'"+id+"'")) b.classList.add('active');
-    });
-  }
-  document.getElementById('t-title').textContent = TITLES[id] || id;
-  closeSidebar();
-  const loaders = {overview:loadOverview,conversations:loadConversations,escaladas:loadEscaladas,pedidos:loadPedidos,seguimientos:loadSeguimientos,pipeline:loadPipeline,templates:loadTemplates,campaigns:loadCampaigns,settings:loadSettings};
-  if(loaders[id]) loaders[id]();
-}
-
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open')}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
-
-/* ══════════════════════════════════════
-   TOAST
-══════════════════════════════════════ */
-function toast(title,msg,ms=3000){
-  const t=document.getElementById('toast');
-  document.getElementById('t-ttl').textContent=title;
-  document.getElementById('t-msg').textContent=msg||'';
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),ms);
-}
-
-/* ══════════════════════════════════════
-   API
-══════════════════════════════════════ */
-async function api(path, opts={}) {
-  if(!CFG.url) return null;
-  try {
-    const h={'Content-Type':'application/json'};
-    if(CFG.pass) h['x-panel-password']=CFG.pass;
-    const r=await fetch(CFG.url.replace(/\/$/,'')+path,{headers:h,...opts});
-    if(!r.ok) return null;
-    return r.json();
-  } catch { return null; }
-}
-
-/* ══════════════════════════════════════
-   OVERVIEW
-══════════════════════════════════════ */
-async function loadOverview() {
-  const convData = await api('/panel/conversations');
-  const total = convData ? Object.keys(convData).length : 0;
-  const escPend = escaladas.filter(e => e.status === 'pending').length;
-  const pedAct  = pedidos.filter(p => !['entregado','cancelado'].includes(p.status)).length;
-
-  document.getElementById('ov-conv').textContent = total;
-  document.getElementById('ov-esc').textContent  = escPend;
-  document.getElementById('ov-ped').textContent  = pedAct;
-  document.getElementById('ov-gasto').textContent = '—';
-
-  updateEscBadge();
-
-  // Escaladas table
-  const et = document.getElementById('ov-esc-table');
-  const pendEsc = escaladas.filter(e=>e.status==='pending').slice(0,5);
-  if(!pendEsc.length) {
-    et.innerHTML=`<tr><td colspan="5" class="empty-msg">Sin escaladas pendientes ✅</td></tr>`;
-  } else {
-    et.innerHTML = pendEsc.map(e=>`
-      <tr onclick="go('escaladas',null)">
-        <td class="td-main">${esc(e.nombre||e.phone)}</td>
-        <td>${esc(e.producto||'—')}</td>
-        <td>${esc(e.zona||'—')}</td>
-        <td><span class="chip ch-red">● Pendiente</span></td>
-        <td style="color:var(--text3)">${relTime(e.ts)}</td>
-      </tr>`).join('');
-  }
-
-  // Pedidos table
-  const pt = document.getElementById('ov-ped-table');
-  const recPed = pedidos.slice(-5).reverse();
-  if(!recPed.length) {
-    pt.innerHTML=`<tr><td colspan="5" class="empty-msg">Sin pedidos aún</td></tr>`;
-  } else {
-    pt.innerHTML = recPed.map(p=>`
-      <tr onclick="go('pedidos',null)">
-        <td class="td-main" style="font-family:var(--mono)">#${p.id}</td>
-        <td>${esc(p.cliente)}</td>
-        <td>${esc(p.producto)}</td>
-        <td style="color:var(--green);font-weight:600">S/.${p.total}</td>
-        <td>${pedStatusChip(p.status)}</td>
-      </tr>`).join('');
-  }
-}
-
-/* ══════════════════════════════════════
-   CONVERSATIONS
-══════════════════════════════════════ */
-async function loadConversations() {
-  const data = await api('/panel/conversations');
-  if(!data) {
-    document.getElementById('convList').innerHTML=`<div class="empty-msg">Sin conexión al servidor.<br>Configura la URL en Ajustes.</div>`;
-    return;
-  }
-  allConvs = data;
-  renderConvList(data);
-  const n = Object.keys(data).length;
-  document.getElementById('conv-chip').textContent = n + ' activo' + (n!==1?'s':'');
-}
-
-function renderConvList(data) {
-  const list = document.getElementById('convList');
-  const entries = Object.entries(data)
-    .map(([phone,msgs])=>({phone,msgs,last:msgs[msgs.length-1]}))
-    .sort((a,b)=>(b.last?.time||0)-(a.last?.time||0));
-  if(!entries.length){list.innerHTML=`<div class="empty-msg">Sin conversaciones</div>`;return;}
-  list.innerHTML = entries.map(({phone,msgs,last})=>`
-    <div class="ci ${phone===activePhone?'active':''}" onclick="openChat('${phone}')" id="ci-${phone}">
-      <div class="ci-r1">
-        <span class="ci-phone">${fmtPhone(phone)}</span>
-        <span class="ci-time">${fmtTime(last?.time)}</span>
-      </div>
-      <div class="ci-prev">${esc(last?.content||'')}</div>
-      ${msgs.length?`<div class="ci-unread">${msgs.length>99?'99+':msgs.length}</div>`:''}
-    </div>`).join('');
-}
-
-function filterConvs(q) {
-  if(!q){renderConvList(allConvs);return;}
-  const f=Object.fromEntries(Object.entries(allConvs).filter(([p])=>p.includes(q.replace(/\D/g,''))));
-  renderConvList(f);
-}
-
-function openChat(phone) {
-  activePhone = phone;
-  document.querySelectorAll('.ci').forEach(el=>el.classList.remove('active'));
-  const item=document.getElementById('ci-'+phone);
-  if(item) item.classList.add('active');
-  const msgs = allConvs[phone]||[];
-  const area = document.getElementById('chatArea');
-  area.innerHTML=`
-    <div class="chat-hdr">
-      <div class="chat-contact">
-        <div class="chat-av">${phone.slice(-2)}</div>
-        <div>
-          <div class="chat-phone">${fmtPhone(phone)}</div>
-          <div class="chat-st">● activo · ${msgs.length} mensajes</div>
+function renderConvs() {
+  const list = document.getElementById('cvList');
+  list.innerHTML = CONVS_DEMO.map(c => `
+    <div class="cv-item ${c.on?'on':''}" onclick="selectConv('${c.id}','${c.name}')">
+      <div class="cv-ava" style="background:${c.color}">${c.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+      <div class="cv-body">
+        <div class="cv-r1">
+          <span class="cv-name">${c.name}</span>
+          <span class="cv-time">${c.time}</span>
         </div>
+        <div class="cv-prev">${c.preview}</div>
+        <div class="cv-cat">${c.cat}</div>
       </div>
-      <div style="display:flex;gap:5px">
-        <button class="btn btn-xs btn-ghost" onclick="refreshChat()">↻</button>
-        <button class="btn btn-xs" onclick="escalarManual('${phone}')">🔔 Escalar</button>
-      </div>
+      ${c.unread ? `<div class="cv-unread">${c.unread}</div>` : ''}
     </div>
-    <div class="chat-msgs" id="chat-msgs">${renderMsgs(msgs)}</div>
-    <div class="chat-inp-wrap">
-      <textarea class="chat-ta" id="chat-ta" placeholder="Escribir mensaje manual..." rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendManual()}"
-        oninput="autoH(this)"></textarea>
-      <button class="chat-send" onclick="sendManual()">➤</button>
-    </div>`;
-  const msgEl=document.getElementById('chat-msgs');
-  if(msgEl) msgEl.scrollTop=msgEl.scrollHeight;
+  `).join('');
 }
 
 function renderMsgs(msgs) {
-  if(!msgs.length) return `<div class="empty-st"><div class="e-ico">💬</div><div class="e-title">Sin mensajes</div></div>`;
-  let html='';let lastD='';
-  msgs.forEach(m=>{
-    const d=m.time?new Date(m.time).toLocaleDateString('es-PE'):'';
-    if(d&&d!==lastD){
-      html+=`<div class="msg-sep">${d===new Date().toLocaleDateString('es-PE')?'Hoy':d}</div>`;
-      lastD=d;
-    }
-    const ag=m.role==='assistant';
-    html+=`<div class="msg-row ${ag?'agt':'usr'}">
-      <div class="msg-bbl">${esc(m.content)}<div class="msg-meta">${fmtTime(m.time)}${ag?' · Angel':''}</div></div>
-    </div>`;
-  });
-  return html;
-}
-
-async function sendManual() {
-  const ta=document.getElementById('chat-ta');
-  if(!ta) return;
-  const text=ta.value.trim();
-  if(!text||!activePhone) return;
-  ta.value=''; ta.style.height='';
-  const r=await api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
-  if(r?.success){toast('Enviado','Mensaje enviado ✓');await loadConversations();openChat(activePhone);}
-  else toast('Error','No se pudo enviar');
-}
-
-async function refreshChat(){if(!activePhone)return;await loadConversations();openChat(activePhone);}
-
-function escalarManual(phone) {
-  const msgs = allConvs[phone]||[];
-  const lastMsg = msgs[msgs.length-1]?.content||'—';
-  addEscalada({phone, nombre:'', producto:'', zona:'Lima', estado:'requiere revisión', resumen:lastMsg, status:'pending', ts:Date.now()});
-  toast('Escalada creada','Conversación marcada para revisión');
-  updateEscBadge();
-}
-
-/* ══════════════════════════════════════
-   ESCALADAS
-══════════════════════════════════════ */
-function addEscalada(data) {
-  const e = {id:Date.now(), status:'pending', ts:Date.now(), ...data};
-  escaladas.unshift(e);
-  localStorage.setItem('escaladas',JSON.stringify(escaladas));
-  updateEscBadge();
-}
-
-function updateEscBadge() {
-  const n=escaladas.filter(e=>e.status==='pending').length;
-  const b=document.getElementById('esc-badge');
-  if(n>0){b.style.display='';b.textContent=n;}else b.style.display='none';
-}
-
-function loadEscaladas() {
-  const el=document.getElementById('esc-container');
-  const pend=escaladas.filter(e=>e.status==='pending');
-  if(!pend.length){
-    el.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">✅</div><div style="font-size:14px;font-weight:600;color:var(--text2)">Sin escaladas pendientes</div><div style="font-size:12px;margin-top:4px">Angel está manejando todo</div></div>`;
-    return;
-  }
-  el.innerHTML = pend.map(e=>`
-    <div class="esc-card" id="esc-${e.id}">
-      <div class="esc-top">
-        <div>
-          <div class="esc-phone">${fmtPhone(e.phone)}</div>
-          <div class="esc-time">${relTime(e.ts)}</div>
-        </div>
-        <div style="display:flex;gap:5px;align-items:center">
-          ${e.zona?`<span class="chip ch-blue">${esc(e.zona)}</span>`:''}
-          <span class="chip ch-red">● Pendiente</span>
-        </div>
-      </div>
-      ${e.producto?`<div style="margin-bottom:8px;font-size:12px"><strong>Producto:</strong> ${esc(e.producto)} · <strong>Total:</strong> S/.${e.total||'—'}</div>`:''}
-      <div class="esc-body">${esc(e.resumen||e.estado||'Sin contexto')}</div>
-      <div class="esc-actions">
-        <button class="btn btn-sm btn-primary" onclick="toggleReply(${e.id})">✏️ Responder</button>
-        <button class="btn btn-sm" onclick="toggleTpls(${e.id})">⚡ Respuesta rápida</button>
-        <button class="btn btn-sm btn-green" onclick="resolverEsc(${e.id})">✓ Resolver</button>
-        <button class="btn btn-xs btn-ghost" onclick="openChat('${e.phone}');go('conversations',null)">Ver chat →</button>
-      </div>
-      <div class="esc-templates" id="etpl-${e.id}">
-        <div class="tpl-grid">${templates.map(t=>`<div class="tpl-btn" onclick="useTpl(${e.id},'${e.phone}',\`${t.body.replace(/`/g,"'")}\`)">${t.title}</div>`).join('')}</div>
-      </div>
-      <div class="esc-reply-area" id="ereply-${e.id}">
-        <textarea class="esc-ta" id="eta-${e.id}" placeholder="Escribe tu respuesta..."></textarea>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-sm btn-primary" onclick="sendEscReply(${e.id},'${e.phone}')">Enviar respuesta</button>
-          <button class="btn btn-sm btn-ghost" onclick="resolverEsc(${e.id})">Marcar resuelto</button>
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-function toggleReply(id){document.getElementById('ereply-'+id)?.classList.toggle('open')}
-function toggleTpls(id){document.getElementById('etpl-'+id)?.classList.toggle('open')}
-
-async function useTpl(escId, phone, body) {
-  const ta=document.getElementById('eta-'+escId);
-  if(ta){ta.value=body;document.getElementById('ereply-'+escId)?.classList.add('open');}
-}
-
-async function sendEscReply(escId, phone) {
-  const ta=document.getElementById('eta-'+escId);
-  const text=ta?.value.trim();
-  if(!text) return;
-  const r=await api('/panel/send',{method:'POST',body:JSON.stringify({phone,message:text})});
-  if(r?.success){toast('Enviado','Respuesta enviada ✓');resolverEsc(escId);}
-  else toast('Error','No se pudo enviar');
-}
-
-function resolverEsc(id) {
-  escaladas=escaladas.map(e=>e.id===id?{...e,status:'resolved'}:e);
-  localStorage.setItem('escaladas',JSON.stringify(escaladas));
-  updateEscBadge();
-  loadEscaladas();
-  toast('Resuelto','Escalada marcada como resuelta');
-}
-
-/* ══════════════════════════════════════
-   PEDIDOS
-══════════════════════════════════════ */
-function loadPedidos() {
-  const el=document.getElementById('ped-container');
-  if(!pedidos.length){
-    el.innerHTML=`<div class="empty-msg">Sin pedidos aún. Se crean automáticamente cuando Angel cierra una venta.</div>`;
-    return;
-  }
-  const active=pedidos.filter(p=>!['entregado','cancelado'].includes(p.status));
-  const done  =pedidos.filter(p=> ['entregado','cancelado'].includes(p.status));
-
-  const renderPed=(p)=>{
-    const steps=['Confirmado','En preparación','Enviado','En camino','Entregado'];
-    const idx={'confirmado':0,'preparacion':1,'enviado':2,'camino':3,'entregado':4}[p.status]??0;
-    return `<div class="pedido-card">
-      <div class="ped-top">
-        <div>
-          <div class="ped-id">#${p.id} · ${relTime(p.ts)}</div>
-          <div class="ped-cliente">${esc(p.cliente)} <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">${fmtPhone(p.phone)}</span></div>
-        </div>
-        ${pedStatusChip(p.status)}
-      </div>
-      <div class="status-flow">
-        ${steps.map((s,i)=>`<div class="sf-step ${i<idx?'done':i===idx?'current':''}">${s}</div>`).join('')}
-      </div>
-      <div class="ped-body">
-        <div class="ped-field"><div class="ped-field-lbl">Producto</div><div class="ped-field-val">${esc(p.producto)}</div></div>
-        <div class="ped-field"><div class="ped-field-lbl">Zona</div><div class="ped-field-val">${esc(p.zona||'—')}</div></div>
-        <div class="ped-field"><div class="ped-field-lbl">Total</div><div class="ped-field-val" style="color:var(--green);font-weight:700">S/.${p.total}</div></div>
-        <div class="ped-field"><div class="ped-field-lbl">Método</div><div class="ped-field-val">${esc(p.metodo||'Yape')}</div></div>
-      </div>
-      ${p.notas?`<div style="font-size:11px;color:var(--text2);background:var(--surface2);padding:8px 10px;border-radius:6px;margin-bottom:10px">${esc(p.notas)}</div>`:''}
-      <div class="ped-actions">
-        <select class="fs" style="width:auto;font-size:11px" onchange="updatePedStatus(${p.id},this.value)">
-          <option value="confirmado" ${p.status==='confirmado'?'selected':''}>Confirmado</option>
-          <option value="preparacion" ${p.status==='preparacion'?'selected':''}>En preparación</option>
-          <option value="enviado" ${p.status==='enviado'?'selected':''}>Enviado</option>
-          <option value="camino" ${p.status==='camino'?'selected':''}>En camino</option>
-          <option value="entregado" ${p.status==='entregado'?'selected':''}>Entregado</option>
-          <option value="cancelado" ${p.status==='cancelado'?'selected':''}>Cancelado</option>
-        </select>
-        <button class="btn btn-sm" onclick="openChat('${p.phone}');go('conversations',null)">Ver chat →</button>
-      </div>
-    </div>`;
-  };
-
-  el.innerHTML=(active.length?'<div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--text2)">ACTIVOS</div>':'')
-    +active.map(renderPed).join('')
-    +(done.length?'<div style="margin:16px 0 8px;font-size:12px;font-weight:600;color:var(--text3)">COMPLETADOS</div>':'')
-    +done.map(renderPed).join('');
-}
-
-function updatePedStatus(id,status) {
-  pedidos=pedidos.map(p=>p.id===id?{...p,status}:p);
-  localStorage.setItem('pedidos',JSON.stringify(pedidos));
-  toast('Actualizado','Estado del pedido actualizado');
-  loadPedidos();
-}
-
-function openNewPedido() {
-  const cliente=prompt('Nombre del cliente:');
-  if(!cliente) return;
-  const phone=prompt('Número WhatsApp (con código país, ej: 51960293996):');
-  const producto=prompt('Producto:');
-  const total=prompt('Total S/.:');
-  const zona=prompt('Zona (Lima / Ciudad provincia):');
-  const p={id:Date.now(),cliente,phone:phone||'',producto,total,zona,metodo:'Yape',status:'confirmado',ts:Date.now()};
-  pedidos.unshift(p);
-  localStorage.setItem('pedidos',JSON.stringify(pedidos));
-  loadPedidos();
-  toast('Pedido creado','#'+p.id+' registrado correctamente');
-}
-
-function pedStatusChip(s) {
-  const map={'confirmado':'ch-blue','preparacion':'ch-purple','enviado':'ch-amber','camino':'ch-amber','entregado':'ch-green','cancelado':'ch-red'};
-  const lbl={'confirmado':'Confirmado','preparacion':'En preparación','enviado':'Enviado','camino':'En camino','entregado':'✓ Entregado','cancelado':'Cancelado'};
-  return `<span class="chip ${map[s]||'ch-gray'}">${lbl[s]||s}</span>`;
-}
-
-/* ══════════════════════════════════════
-   SEGUIMIENTOS
-══════════════════════════════════════ */
-async function loadSeguimientos() {
-  const el=document.getElementById('seg-container');
-  const data=await api('/panel/conversations');
-  if(!data){el.innerHTML=`<div class="empty-msg">Sin conexión al servidor</div>`;return;}
-
-  // Clientes sin respuesta en más de 3 horas (mock: todos los que tienen último mensaje del usuario)
-  const now=Date.now();
-  const entries=Object.entries(data)
-    .map(([phone,msgs])=>({phone,msgs,last:msgs[msgs.length-1]}))
-    .filter(({last})=>last?.role==='user'&&(now-(last.time||0))>10800000)
-    .sort((a,b)=>(a.last?.time||0)-(b.last?.time||0));
-
-  if(!entries.length){
-    el.innerHTML=`<div style="text-align:center;padding:48px;color:var(--text3)"><div style="font-size:32px;margin-bottom:12px">👍</div><div style="font-size:14px;font-weight:600;color:var(--text2)">Sin seguimientos pendientes</div><div style="font-size:12px;margin-top:4px">Todos los clientes han sido atendidos</div></div>`;
-    return;
-  }
-
-  el.innerHTML=entries.map(({phone,msgs,last})=>{
-    const hrs=Math.floor((now-(last?.time||0))/3600000);
-    const urgent=hrs>24;
-    return `<div class="seg-card ${urgent?'urgent':''}">
-      <div class="seg-av">${phone.slice(-2)}</div>
-      <div class="seg-info">
-        <div class="seg-phone">${fmtPhone(phone)}</div>
-        <div class="seg-last">${esc(last?.content||'')}</div>
-        <div class="seg-time ${urgent?'trend-dn':''}">Sin respuesta hace ${hrs}h${urgent?' ⚠️':''}</div>
-      </div>
-      <div class="seg-actions">
-        <button class="btn btn-xs" onclick="openChat('${phone}');go('conversations',null)">Ver chat</button>
-        <button class="btn btn-xs btn-primary" onclick="sendFollowUp('${phone}')">Seguimiento</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function sendFollowUp(phone) {
-  const msgs=allConvs[phone]||[];
-  const lastMsg=msgs.find(m=>m.role==='user')?.content||'';
-  const msg=`Hola! Te escribo de Across Sports Perú 👋 Quedamos conversando sobre tu consulta. ¿Pudiste ver la información? Con gusto te ayudo 😊`;
-  const r=await api('/panel/send',{method:'POST',body:JSON.stringify({phone,message:msg})});
-  if(r?.success){toast('Seguimiento enviado','Mensaje de seguimiento enviado ✓');}
-  else toast('Error','No se pudo enviar');
-}
-
-/* ══════════════════════════════════════
-   PIPELINE
-══════════════════════════════════════ */
-async function loadPipeline() {
-  const data=await api('/panel/conversations');
-  // Simple heuristic: classify by last message count and content
-  const cols=[],[],[],[],[]];
-  const COLS=[[],[],[],[],[]];
-
-  if(data) {
-    Object.entries(data).forEach(([phone,msgs])=>{
-      const last=msgs[msgs.length-1];
-      const text=(last?.content||'').toLowerCase();
-      let col=0;
-      if(msgs.length>3) col=1;
-      if(text.includes('cuánto')|| text.includes('precio')|| text.includes('costo')) col=1;
-      if(text.includes('yape')|| text.includes('pagar')|| text.includes('transferencia')) col=2;
-      if(text.includes('enviado')|| text.includes('shalom')|| text.includes('indriver')) col=3;
-
-      const card=`<div class="pipe-card">
-        <div class="pc-phone">${fmtPhone(phone)}</div>
-        <div class="pc-prod">${esc(last?.content?.slice(0,40)||'Sin mensaje')}...</div>
-        <div class="pc-time">${fmtTime(last?.time)}</div>
+  const el = document.getElementById('msgs');
+  el.innerHTML = msgs.map(m => {
+    if(m.role==='user') return `
+      <div class="msg-wrap msg-in">
+        <div class="msg-sender">${m.name}</div>
+        <div class="msg-bbl">${esc(m.text)}</div>
+        <div class="msg-meta"><span class="msg-agent">ACROS Agent</span><span>${m.time}</span></div>
       </div>`;
-      COLS[col].push(card);
-    });
+    return `
+      <div class="msg-wrap msg-out">
+        <div class="msg-bbl">${esc(m.text)}</div>
+        <div class="msg-meta">
+          <span class="msg-agent">ACROS Agent</span>
+          <span>${m.time}</span>
+          <span class="msg-tick">✓✓</span>
+        </div>
+      </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderAutos() {
+  document.getElementById('autoList').innerHTML = AUTOS.map(a => `
+    <div class="auto-item">
+      <div class="auto-icon" style="background:${a.bg}">${a.icon}</div>
+      <div class="auto-info">
+        <div class="auto-name">${a.name}</div>
+        <div class="auto-sub">${a.sub}</div>
+      </div>
+      <div class="auto-right">
+        <div style="display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-bottom:3px">
+          <span class="auto-active">● Activa</span>
+          <span class="auto-count">${a.count}</span>
+        </div>
+        <div class="auto-exec">Ejecutado hoy</div>
+      </div>
+    </div>`).join('');
+}
+
+let activePhone = null;
+
+async function selectConv(phone, name) {
+  document.querySelectorAll('.cv-item').forEach(e=>e.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+  document.getElementById('chatName').innerHTML = `${name} <span class="chat-badge">Lead caliente</span>`;
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2);
+  document.getElementById('chatAva').textContent = initials;
+  activePhone = phone;
+
+  const data = await api('/panel/conversations');
+  if(data && data[phone]) {
+    const msgs = data[phone].map(m=>({role:m.role,text:m.content,name:name,time:'—'}));
+    renderMsgs(msgs);
+  } else {
+    renderMsgs(MSGS_DEMO);
   }
-
-  // Add closed pedidos to col 4
-  pedidos.filter(p=>p.status==='entregado').forEach(p=>{
-    COLS[4].push(`<div class="pipe-card">
-      <div class="pc-phone">${fmtPhone(p.phone)}</div>
-      <div class="pc-prod">${esc(p.producto)}</div>
-      <div class="pc-amount">S/.${p.total}</div>
-    </div>`);
-  });
-
-  COLS.forEach((cards,i)=>{
-    document.getElementById('pb-'+i).innerHTML=cards.join('')||'<div style="padding:8px;font-size:10px;color:var(--text3);text-align:center">Vacío</div>';
-    document.getElementById('pc-'+i).textContent=cards.length;
-  });
 }
 
-/* ══════════════════════════════════════
-   TEMPLATES
-══════════════════════════════════════ */
-function loadTemplates() {
-  const el=document.getElementById('tpl-container');
-  el.innerHTML=templates.map(t=>`
-    <div class="tpl-item">
-      <div class="tpl-tag"><span class="chip ${t.color||'ch-blue'}">${esc(t.tag)}</span></div>
-      <div class="tpl-title">${esc(t.title)}</div>
-      <div class="tpl-preview">${esc(t.body.slice(0,120))}${t.body.length>120?'...':''}</div>
-      <div class="tpl-footer">
-        <button class="btn btn-xs" onclick="copyTpl(${t.id})">📋 Copiar</button>
-        <button class="btn btn-xs btn-ghost" onclick="deleteTpl(${t.id})">🗑</button>
-      </div>
-    </div>`).join('');
-}
-
-function copyTpl(id) {
-  const t=templates.find(t=>t.id===id);
-  if(!t) return;
-  navigator.clipboard.writeText(t.body).then(()=>toast('Copiado','Plantilla copiada al portapapeles'));
-}
-
-function deleteTpl(id) {
-  if(!confirm('¿Eliminar esta plantilla?')) return;
-  templates=templates.filter(t=>t.id!==id);
-  localStorage.setItem('templates',JSON.stringify(templates));
-  loadTemplates();
-}
-
-function openAddTemplate() {
-  const tag=prompt('Etiqueta (ej: Lima, Provincia, Yape):');
-  if(!tag) return;
-  const title=prompt('Título:');
-  const body=prompt('Cuerpo del mensaje:');
-  if(!body) return;
-  const t={id:Date.now(),tag,title:title||tag,body,color:'ch-blue'};
-  templates.push(t);
-  localStorage.setItem('templates',JSON.stringify(templates));
-  loadTemplates();
-  toast('Plantilla creada','Agregada correctamente');
-}
-
-/* ══════════════════════════════════════
-   CAMPAIGNS
-══════════════════════════════════════ */
-async function loadCampaigns() {
-  document.getElementById('camp-container').innerHTML=`<div class="loading"><div class="spinner"></div> Cargando campañas...</div>`;
-  const data=await api('/panel/campaigns');
-  if(!data?.campaigns?.length){
-    document.getElementById('camp-container').innerHTML=`<div class="empty-msg">No se cargaron campañas.<br>Verifica la URL del servidor y el ID de cuenta publicitaria en Configuración.</div>`;
-    return;
+async function sendMsg() {
+  const ta = document.getElementById('msgTa');
+  const text = ta.value.trim();
+  if(!text) return;
+  ta.value=''; ta.style.height='';
+  if(activePhone) {
+    await api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
+    await selectConv(activePhone, document.getElementById('chatName').textContent.replace('Lead caliente','').trim());
+  } else {
+    MSGS_DEMO.push({role:'assistant',text,time:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})});
+    renderMsgs(MSGS_DEMO);
   }
-  const camps=data.campaigns;
-  const tot={spend:0,impr:0,convs:0};
-  camps.forEach(c=>{tot.spend+=parseFloat(c.spend||0);tot.impr+=parseInt(c.impressions||0);tot.convs+=parseInt(c.conversations||0);});
-  document.getElementById('c-gasto').textContent ='S/.'+tot.spend.toFixed(2);
-  document.getElementById('c-impr').textContent  =fmtN(tot.impr);
-  document.getElementById('c-convs').textContent =fmtN(tot.convs);
-  document.getElementById('c-cpc').textContent   =tot.convs>0?'S/.'+( tot.spend/tot.convs).toFixed(2):'—';
-  document.getElementById('c-sync').textContent  ='Última sync: '+new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
-
-  document.getElementById('camp-container').innerHTML=camps.map(c=>`
-    <div class="camp-card">
-      <div class="camp-top">
-        <div><div class="camp-name">${esc(c.name)}</div><div class="camp-id">ID: ${c.id}</div></div>
-        <span class="chip ${c.status==='ACTIVE'?'ch-green':'ch-amber'}">${c.status==='ACTIVE'?'● Activa':c.status}</span>
-      </div>
-      <div class="camp-metrics">
-        <div class="cm"><div class="cm-val">S/.${parseFloat(c.spend||0).toFixed(2)}</div><div class="cm-lbl">Gasto</div></div>
-        <div class="cm"><div class="cm-val">${fmtN(c.impressions)}</div><div class="cm-lbl">Impresiones</div></div>
-        <div class="cm"><div class="cm-val">${fmtN(c.reach)}</div><div class="cm-lbl">Alcance</div></div>
-        <div class="cm"><div class="cm-val">${fmtN(c.conversations)}</div><div class="cm-lbl">Conversaciones</div></div>
-        <div class="cm"><div class="cm-val">${parseInt(c.conversations||0)>0?'S/.'+( parseFloat(c.spend||0)/parseInt(c.conversations)).toFixed(2):'—'}</div><div class="cm-lbl">Costo/conv.</div></div>
-      </div>
-    </div>`).join('');
 }
 
-/* ══════════════════════════════════════
-   SETTINGS
-══════════════════════════════════════ */
-function loadSettings() {
-  document.getElementById('cfg-url').value=CFG.url;
-  document.getElementById('cfg-pass').value=CFG.pass;
-  document.getElementById('cfg-adaccount').value=CFG.adAccount;
-  loadSysStatus();
+async function api(path, opts={}) {
+  try {
+    const r = await fetch(SERVER+path,{headers:{'Content-Type':'application/json','x-panel-password':PASS},...opts});
+    if(!r.ok) return null;
+    return r.json();
+  } catch(e){return null;}
 }
 
-async function loadSysStatus() {
-  const el=document.getElementById('sys-status');
-  const data=await api('/panel/health');
-  const checks=[
-    {l:'Servidor Railway',ok:!!data},
-    {l:'WhatsApp API',ok:data?.whatsapp},
-    {l:'Anthropic (Claude)',ok:data?.anthropic},
-    {l:'Webhook activo',ok:data?.webhook},
-  ];
-  el.innerHTML=checks.map(c=>`
-    <div class="sys-row">
-      <div style="font-size:12px;font-weight:500">${c.l}</div>
-      <span class="chip ${c.ok?'ch-green':'ch-red'}">${c.ok?'● OK':'● Error'}</span>
-    </div>`).join('');
-}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 
-function saveConfig() {
-  CFG.url=document.getElementById('cfg-url').value.trim();
-  CFG.pass=document.getElementById('cfg-pass').value.trim();
-  CFG.adAccount=document.getElementById('cfg-adaccount').value.trim();
-  localStorage.setItem('angel_url',CFG.url);
-  localStorage.setItem('angel_pass',CFG.pass);
-  localStorage.setItem('angel_ad',CFG.adAccount);
-  toast('Guardado','Configuración guardada ✓');
-  loadOverview();
-}
-
-/* ══════════════════════════════════════
-   PARSE ESCALADAS FROM ANGEL MESSAGES
-══════════════════════════════════════ */
-function parseEscaladas(convData) {
-  // Detect escalation messages from Angel
-  Object.entries(convData||{}).forEach(([phone,msgs])=>{
-    msgs.forEach(m=>{
-      if(m.role==='assistant'&&m.content?.includes('ESCALAR A LUIS')) {
-        const alreadyExists=escaladas.some(e=>e.phone===phone&&Math.abs(e.ts-(m.time||Date.now()))<60000);
-        if(!alreadyExists) {
-          const lines=m.content.split('\n');
-          const get=(key)=>lines.find(l=>l.startsWith(key))?.split(':').slice(1).join(':').trim()||'';
-          addEscalada({
-            phone,
-            nombre:   get('Cliente'),
-            producto: get('Producto'),
-            total:    get('Precio')?.replace('S/.','').trim(),
-            zona:     get('Zona'),
-            estado:   get('Estado'),
-            resumen:  get('Resumen'),
-            status:   'pending',
-            ts:       m.time||Date.now(),
-          });
-        }
+async function init() {
+  renderConvs();
+  renderMsgs(MSGS_DEMO);
+  renderAutos();
+  const data = await api('/panel/conversations');
+  if(data) {
+    const entries = Object.entries(data);
+    if(entries.length) {
+      const list = document.getElementById('cvList');
+      list.innerHTML = entries.map(([phone,msgs],i)=>{
+        const last = msgs[msgs.length-1];
+        const esc2 = msgs.some(m=>m.content?.includes('ESCALAR A LUIS'));
+        const colors=['#3b82f6','#8b5cf6','#22c55e','#f59e0b','#06b6d4','#ef4444'];
+        const initials = phone.slice(-2).toUpperCase();
+        return `<div class="cv-item ${i===0?'on':''}" onclick="selectConv('${phone}','${initials}')">
+          <div class="cv-ava" style="background:${colors[i%colors.length]}">${initials}</div>
+          <div class="cv-body">
+            <div class="cv-r1"><span class="cv-name">+${phone.slice(0,2)} *** ${phone.slice(-4)}</span><span class="cv-time">${msgs.length} msgs</span></div>
+            <div class="cv-prev">${String(last?.content||'').slice(0,45)}...</div>
+            <div class="cv-cat">${esc2?'🔔 Escalada':'💬 WhatsApp'}</div>
+          </div>
+          ${esc2?'<div class="cv-unread">!</div>':''}
+        </div>`;
+      }).join('') + `<div class="cv-more"><span>Ver todas las conversaciones</span><span>→</span></div>`;
+      if(entries.length) {
+        activePhone = entries[0][0];
+        const msgs = entries[0][1].map(m=>({role:m.role,text:m.content,name:'Cliente',time:'—'}));
+        renderMsgs(msgs);
       }
-    });
-  });
+    }
+  }
 }
 
-/* ══════════════════════════════════════
-   POLLING
-══════════════════════════════════════ */
-function startPolling() {
-  if(pollTimer) clearInterval(pollTimer);
-  pollTimer=setInterval(async()=>{
-    const data=await api('/panel/conversations');
-    if(!data) return;
-    const prevN=Object.keys(allConvs).length;
-    allConvs=data;
-    parseEscaladas(data);
-    updateEscBadge();
-    if(Object.keys(data).length>prevN) toast('Nuevo mensaje','Llegó un nuevo mensaje');
-    const active=document.querySelector('.view.active')?.id;
-    if(active==='view-conversations'){renderConvList(data);if(activePhone)openChat(activePhone);}
-    if(active==='view-overview') loadOverview();
-    if(active==='view-seguimientos') loadSeguimientos();
-  },8000);
-}
-
-/* ══════════════════════════════════════
-   UTILS
-══════════════════════════════════════ */
-function fmtPhone(p){if(!p)return'—';if(p.startsWith('51')&&p.length===11)return'+51 '+p.slice(2,5)+' '+p.slice(5,8)+' '+p.slice(8);return'+'+p}
-function fmtTime(ts){if(!ts)return'';const d=new Date(ts),n=new Date();if(d.toDateString()===n.toDateString())return d.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});return d.toLocaleDateString('es-PE',{day:'2-digit',month:'short'})}
-function relTime(ts){if(!ts)return'';const m=Math.floor((Date.now()-ts)/60000);if(m<1)return'ahora';if(m<60)return m+'min';if(m<1440)return Math.floor(m/60)+'h';return Math.floor(m/1440)+'d'}
-function fmtN(n){const x=parseInt(n||0);if(x>=1000)return(x/1000).toFixed(1)+'k';return x.toString()}
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function autoH(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
-function refreshAll(){const v=document.querySelector('.view.active')?.id?.replace('view-','');const m={overview:loadOverview,conversations:loadConversations,escaladas:loadEscaladas,pedidos:loadPedidos,seguimientos:loadSeguimientos,pipeline:loadPipeline,templates:loadTemplates,campaigns:loadCampaigns};if(m[v])m[v]();toast('Actualizado','Datos actualizados ✓')}
-
-/* ══════════════════════════════════════
-   INIT
-══════════════════════════════════════ */
-window.addEventListener('load',()=>{
-  loadOverview();
-  startPolling();
-  // Load config into settings fields
-  document.getElementById('cfg-url').value=CFG.url;
-});
+init();
 </script>
 </body>
 </html>
