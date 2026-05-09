@@ -452,18 +452,17 @@ svg{display:block}
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
             oninput="this.style.height='';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
           <div class="chat-input-icons">
+            <div class="ci-icon">📎</div>
             <div class="ci-icon">😊</div>
+            <div class="ci-icon">⚡</div>
           </div>
           <div class="chat-send-btn" onclick="sendMsg()">Enviar</div>
         </div>
         <div class="chat-actions">
           <div class="ca-btn ca-reply">↩ Responder</div>
-          <label class="ca-btn" style="cursor:pointer;background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:var(--blue)" title="Enviar imagen">
-            🖼️ Imagen
-            <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
-          </label>
+          <div class="ca-btn ca-default">👤 Asignar</div>
           <div class="ca-btn ca-default">📅 Seguimiento</div>
-          <div class="ca-btn ca-default">✓ Cerrado</div>
+          <div class="ca-btn ca-default">✓ Marcar como cerrado</div>
         </div>
       </div>
     </div>
@@ -703,13 +702,8 @@ async function sendMsg() {
   if(!text) return;
   ta.value=''; ta.style.height='';
   if(activePhone) {
-    // Mostrar inmediatamente sin esperar respuesta del servidor
-    if(!allConvs[activePhone]) allConvs[activePhone]=[];
-    allConvs[activePhone].push({role:'assistant',content:text});
-    const currentName = document.getElementById('chatName').textContent.replace('Lead caliente','').trim();
-    renderMsgsFromConv(activePhone);
-    // Enviar en background
-    api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
+    await api('/panel/send',{method:'POST',body:JSON.stringify({phone:activePhone,message:text})});
+    await selectConv(activePhone, document.getElementById('chatName').textContent.replace('Lead caliente','').trim());
   } else {
     MSGS_DEMO.push({role:'assistant',text,time:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})});
     renderMsgs(MSGS_DEMO);
@@ -722,22 +716,6 @@ async function api(path, opts={}) {
     if(!r.ok) return null;
     return r.json();
   } catch(e){return null;}
-}
-
-function renderMsgsFromConv(phone) {
-  const msgs = allConvs[phone] || [];
-  const container = document.getElementById('msgs');
-  container.innerHTML = msgs.map(m => {
-    const escMsg = m.content?.includes('🔔 ESCALAR') || m.content?.includes('ESCALAR A LUIS');
-    if(escMsg) return '<div class="msg-esc">' + esc(m.content) + '</div>';
-    const isImg = m.isImage && m.imageUrl;
-    return '<div class="msg-wrap ' + (m.role==='user'?'msg-in':'msg-out') + '">' +
-      (isImg ? '<img src="' + m.imageUrl + '" style="max-width:220px;border-radius:10px;display:block;margin-bottom:4px;cursor:pointer" onclick="window.open(this.src,\'_blank\')">' : '') +
-      '<div class="msg-bbl">' + esc(m.content) + '</div>' +
-      '<div class="msg-meta"><span class="msg-agent">' + (m.role==='assistant'?'ACROS Agent':'') + '</span></div>' +
-      '</div>';
-  }).join('');
-  container.scrollTop = container.scrollHeight;
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
@@ -767,7 +745,9 @@ async function init() {
         </div>`;
       }).join('') + `<div class="cv-more"><span>Ver todas las conversaciones</span><span>→</span></div>`;
       if(entries.length) {
-        selectConv(entries[0][0], entries[0][0].slice(-4));
+        activePhone = entries[0][0];
+        const msgs = entries[0][1].map(m=>({role:m.role,text:m.content,name:'Cliente',time:'—'}));
+        renderMsgs(msgs);
       }
     }
   }
@@ -777,15 +757,16 @@ init();
 setInterval(async () => {
   const data = await api('/panel/conversations');
   if(data) {
-    checkNewMessages(data);
     allConvs = data;
     renderConvList();
     updateStats();
     if(activePhone && data[activePhone]) {
-      renderMsgsFromConv(activePhone);
+      const msgs = data[activePhone];
+      const lastKnown = allConvs[activePhone]?.length || 0;
+      if(msgs.length > lastKnown) openChat(activePhone, document.getElementById('chatName')?.textContent?.replace('Lead caliente','').trim() || activePhone);
     }
   }
-}, 10000);
+}, 15000);
 </script>
 </body>
 </html>
