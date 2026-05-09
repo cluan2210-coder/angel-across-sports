@@ -846,20 +846,19 @@ function hideMobileList() {
   document.querySelector('.shell').classList.remove('show-list');
 }
 
+function updateStats() {} // placeholder
+
 init();
 setInterval(async () => {
   const data = await api('/panel/conversations');
   if(data) {
     const prevCount = activePhone ? (allConvs[activePhone]?.length || 0) : 0;
     allConvs = data;
-    renderConvs();
-    updateStats();
     if(activePhone && data[activePhone]) {
       const newCount = data[activePhone].length;
-      // Solo recargar el chat si hay mensajes nuevos del cliente
       if(newCount > prevCount) {
         const name = document.getElementById('chatName')?.textContent?.replace('Lead caliente','').trim() || activePhone;
-        const msgs = data[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:'—',isImage:m.isImage,imageUrl:m.imageUrl}));
+        const msgs = data[activePhone].map(m=>({role:m.role,text:m.content||m.text,name:name,time:m.time||'—',isImage:m.isImage,imageUrl:m.imageUrl}));
         renderMsgs(msgs);
       }
     }
