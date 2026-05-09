@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ACROS Agent CRM</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -744,22 +745,33 @@ async function handleImageUpload(event) {
   if(!file) return;
   const caption = prompt('Caption (opcional):') || '';
 
-  // Subir directo a Cloudinary con transformación automática
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', 'acros_panel');
-  fd.append('folder', 'acros-sports');
-
-  alert('⏳ Enviando imagen...');
+  alert('⏳ Comprimiendo y enviando...');
 
   try {
+    // Comprimir con browser-image-compression
+    const imageCompression = window.imageCompression;
+    let compressedFile = file;
+    if(imageCompression) {
+      compressedFile = await imageCompression(file, {
+        maxSizeMB: 3,
+        maxWidthOrHeight: 1280,
+        useWebWorker: false,
+        fileType: 'image/jpeg'
+      });
+    }
+
+    const fd = new FormData();
+    fd.append('file', compressedFile);
+    fd.append('upload_preset', 'acros_panel');
+    fd.append('folder', 'acros-sports');
+
     const uploadRes = await fetch('https://api.cloudinary.com/v1_1/dkoyl1oz8/image/upload', {
       method: 'POST',
       body: fd
     });
     const uploadData = await uploadRes.json();
     if(!uploadData.secure_url) {
-      alert('❌ Error: ' + (uploadData.error?.message || 'archivo muy grande, usa una foto más pequeña'));
+      alert('❌ Error: ' + (uploadData.error?.message || 'No se pudo subir'));
       return;
     }
     const r = await fetch(SERVER + '/panel/send-image', {
