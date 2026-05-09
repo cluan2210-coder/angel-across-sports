@@ -749,3 +749,4 @@ app.get("/panel", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Angel corriendo en puerto ${PORT}`));
+"sharp": "^0.33.0"
