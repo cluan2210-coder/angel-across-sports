@@ -743,25 +743,34 @@ async function handleImageUpload(event) {
   const file = event.target.files[0];
   if(!file) return;
   const caption = prompt('Caption (opcional):') || '';
+  
+  // Usar XMLHttpRequest en vez de fetch para compatibilidad con iOS Safari
   const formData = new FormData();
   formData.append('image', file);
   formData.append('phone', activePhone);
   formData.append('caption', caption);
-  try {
-    const r = await fetch(SERVER + '/panel/upload-and-send', {
-      method: 'POST',
-      headers: { 'x-panel-password': PASS },
-      body: formData
-    });
-    const data = await r.json();
-    if(data.success) {
-      alert('✅ Imagen enviada al cliente');
-    } else {
-      alert('❌ Error: ' + (data.error || 'No se pudo enviar'));
+  
+  alert('⏳ Enviando imagen...');
+  
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', SERVER + '/panel/upload-and-send', true);
+  xhr.setRequestHeader('x-panel-password', PASS);
+  xhr.onload = function() {
+    try {
+      const data = JSON.parse(xhr.responseText);
+      if(data.success) {
+        alert('✅ Imagen enviada al cliente');
+      } else {
+        alert('❌ Error: ' + (data.error || 'No se pudo enviar'));
+      }
+    } catch(e) {
+      alert('❌ Error al procesar respuesta');
     }
-  } catch(e) {
+  };
+  xhr.onerror = function() {
     alert('❌ Error de conexión');
-  }
+  };
+  xhr.send(formData);
   event.target.value = '';
 }
 
