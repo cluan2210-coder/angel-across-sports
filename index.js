@@ -631,6 +631,26 @@ app.get("/panel/conversations", authPanel, (req, res) => {
   res.json(result);
 });
 
+// POST /panel/send-image — enviar imagen por URL desde el panel
+app.post('/panel/send-image', authPanel, async (req, res) => {
+  const { phone, imageUrl, caption } = req.body;
+  if (!phone || !imageUrl) return res.status(400).json({ error: 'Falta phone o imageUrl' });
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      { messaging_product: 'whatsapp', to: phone, type: 'image', image: { link: imageUrl, caption: caption || '' } },
+      { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, 'Content-Type': 'application/json' } }
+    );
+    if (!conversationHistory[phone]) conversationHistory[phone] = [];
+    conversationHistory[phone].push({ role: 'assistant', content: caption ? `[IMAGEN] ${caption}` : '[IMAGEN enviada]', imageUrl, isImage: true, time: new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}) });
+    saveData();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error send-image:', err.response?.data || err.message);
+    res.status(500).json({ error: err.response?.data || err.message });
+  }
+});
+
 // POST /panel/send — enviar mensaje manual desde el panel
 app.post("/panel/send", authPanel, async (req, res) => {
   const { phone, message } = req.body;
