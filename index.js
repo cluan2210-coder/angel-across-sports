@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const path = require("path");
+const fs = require("fs");
 const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -11,8 +12,38 @@ const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const PANEL_PASSWORD = process.env.PANEL_PASSWORD || "acrosssports2024";
 
-const conversationHistory = {};
-const conversationMeta = {}; // guarda nombre, último mensaje, timestamps
+// ── PERSISTENCIA EN VOLUME /data ──
+const DATA_DIR = "/data";
+const CONVS_FILE = path.join(DATA_DIR, "conversaciones.json");
+const META_FILE = path.join(DATA_DIR, "meta.json");
+
+function loadData() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    const convs = fs.existsSync(CONVS_FILE) ? JSON.parse(fs.readFileSync(CONVS_FILE, "utf8")) : {};
+    const meta = fs.existsSync(META_FILE) ? JSON.parse(fs.readFileSync(META_FILE, "utf8")) : {};
+    return { convs, meta };
+  } catch (e) {
+    console.error("Error cargando datos:", e.message);
+    return { convs: {}, meta: {} };
+  }
+}
+
+function saveData() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(CONVS_FILE, JSON.stringify(conversationHistory), "utf8");
+    fs.writeFileSync(META_FILE, JSON.stringify(conversationMeta), "utf8");
+  } catch (e) {
+    console.error("Error guardando datos:", e.message);
+  }
+}
+
+// Cargar datos existentes al arrancar
+const { convs: savedConvs, meta: savedMeta } = loadData();
+const conversationHistory = savedConvs;
+const conversationMeta = savedMeta;
+console.log(`Datos cargados: ${Object.keys(conversationHistory).length} conversaciones`);
 
 const ANGEL_PROMPT = `Eres Angel, el agente de ventas de Across Sports Perú. No eres un bot — eres el mejor vendedor de artículos deportivos del Perú. Tienes la mentalidad de un closer de élite: escuchas más de lo que hablas, haces las preguntas correctas, conectas emocionalmente con cada cliente y los guías naturalmente hacia la compra. Tu misión no es "vender" — es ayudar a cada persona a tomar la mejor decisión para su deporte, su familia o su negocio.
 
@@ -427,6 +458,7 @@ app.post("/webhook", async (req, res) => {
   }
 
   conversationHistory[from].push({ role: "user", content: text });
+  saveData();
   conversationMeta[from].lastMessage = now;
   conversationMeta[from].messageCount++;
   conversationMeta[from].lastUserText = text;
@@ -460,6 +492,7 @@ app.post("/webhook", async (req, res) => {
 
     const reply = claudeRes.data.content[0].text;
     conversationHistory[from].push({ role: "assistant", content: reply });
+    saveData();
     conversationMeta[from].lastReply = reply;
 
     // Detectar escalada en respuesta de Angel
