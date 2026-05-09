@@ -460,9 +460,12 @@ svg{display:block}
         </div>
         <div class="chat-actions">
           <div class="ca-btn ca-reply">↩ Responder</div>
-          <div class="ca-btn ca-default">👤 Asignar</div>
+          <label class="ca-btn" style="cursor:pointer;background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:var(--blue)">
+            🖼️ Imagen
+            <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+          </label>
           <div class="ca-btn ca-default">📅 Seguimiento</div>
-          <div class="ca-btn ca-default">✓ Marcar como cerrado</div>
+          <div class="ca-btn ca-default">✓ Cerrado</div>
         </div>
       </div>
     </div>
@@ -694,6 +697,33 @@ async function selectConv(phone, name) {
   } else {
     renderMsgs(MSGS_DEMO);
   }
+}
+
+async function handleImageUpload(event) {
+  if(!activePhone) { alert('Selecciona una conversación primero'); return; }
+  const file = event.target.files[0];
+  if(!file) return;
+  const caption = prompt('Caption (opcional):') || '';
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('phone', activePhone);
+  formData.append('caption', caption);
+  try {
+    const r = await fetch(SERVER + '/panel/upload-and-send', {
+      method: 'POST',
+      headers: { 'x-panel-password': PASS },
+      body: formData
+    });
+    const data = await r.json();
+    if(data.success) {
+      alert('✅ Imagen enviada al cliente');
+    } else {
+      alert('❌ Error: ' + (data.error || 'No se pudo enviar'));
+    }
+  } catch(e) {
+    alert('❌ Error de conexión');
+  }
+  event.target.value = '';
 }
 
 async function sendMsg() {
