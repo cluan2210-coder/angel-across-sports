@@ -753,10 +753,11 @@ async function handleImageUpload(event) {
     let compressedFile = file;
     if(imageCompression) {
       compressedFile = await imageCompression(file, {
-        maxSizeMB: 3,
-        maxWidthOrHeight: 1280,
-        useWebWorker: false,
-        fileType: 'image/jpeg'
+        maxSizeMB: 1,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+        initialQuality: 0.5
       });
     }
 
