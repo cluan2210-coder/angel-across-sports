@@ -754,6 +754,19 @@ async function init() {
 }
 
 init();
+setInterval(async () => {
+  const data = await api('/panel/conversations');
+  if(data) {
+    allConvs = data;
+    renderConvList();
+    updateStats();
+    if(activePhone && data[activePhone]) {
+      const msgs = data[activePhone];
+      const lastKnown = allConvs[activePhone]?.length || 0;
+      if(msgs.length > lastKnown) openChat(activePhone, document.getElementById('chatName')?.textContent?.replace('Lead caliente','').trim() || activePhone);
+    }
+  }
+}, 15000);
 </script>
 </body>
 </html>
