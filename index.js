@@ -534,7 +534,7 @@ app.post("/webhook", async (req, res) => {
 
   const text = message.text.body;
 
-  conversationHistory[from].push({ role: 'user', content: text });
+  conversationHistory[from].push({ role: 'user', content: text, time: new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}), date: new Date().toLocaleDateString('es-PE') });
   saveData();
   if (conversationHistory[from].length === 1) {
     notificarLuis('Nuevo cliente\n+' + from + '\n' + text.slice(0,80));
@@ -571,7 +571,7 @@ app.post("/webhook", async (req, res) => {
     );
 
     const reply = claudeRes.data.content[0].text;
-    conversationHistory[from].push({ role: "assistant", content: reply });
+    conversationHistory[from].push({ role: "assistant", content: reply, time: new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}), date: new Date().toLocaleDateString("es-PE") });
     saveData();
     conversationMeta[from].lastReply = reply;
 
@@ -613,6 +613,8 @@ app.get("/panel/conversations", authPanel, (req, res) => {
       time: conversationMeta[phone]?.lastMessage || new Date().toISOString(),
       imageUrl: m.imageUrl || null,
       isImage: m.isImage || false,
+      time: m.time || null,
+      date: m.date || null,
     }));
   });
   res.json(result);
