@@ -11,10 +11,6 @@ const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const PANEL_PASSWORD = process.env.PANEL_PASSWORD || "acrosssports2024";
-const CLOUDINARY_CLOUD = process.env.CLOUDINARY_CLOUD || "dkoyl1oz8";
-const CLOUDINARY_KEY = process.env.CLOUDINARY_KEY || "268934121615558";
-const CLOUDINARY_SECRET = process.env.CLOUDINARY_SECRET || "jyErA75bPMYHTP_Kz5XQL5Gdxlk";
-const LUIS_PHONE = "51916646279"; // WhatsApp de Luis para notificaciones
 
 // ── PERSISTENCIA EN VOLUME /data ──
 const DATA_DIR = "/data";
@@ -49,66 +45,6 @@ const conversationHistory = savedConvs;
 const conversationMeta = savedMeta;
 console.log(`Datos cargados: ${Object.keys(conversationHistory).length} conversaciones`);
 
-// ── FOTOS DE PRODUCTOS ──
-const FOTOS = {
-  tatami_2_5_colores: "https://drive.google.com/uc?export=view&id=1ivGljPY1QVseSvEdCLrasw776sud_bnk", // TATAMI 2.5 CM COLORES
-  tatami_todos:       "https://drive.google.com/uc?export=view&id=1zZRpxot7SkzXizlxD3uSUM9q-MDXtOqn", // TATAMI 2.5 3 Y 4 CM JUNTOS
-  tatami_dentado:     "https://drive.google.com/uc?export=view&id=1W9DEdTeELXYNEDyj_Q2_LF7sfprIJwNW", // DENTADO TATAMI (textura)
-  tatami_4cm_medida:  "https://drive.google.com/uc?export=view&id=1iDjOm6dpshWtyG5EO5tabfaRH5RgwjEn", // MEDIDA TATAMI 4CM
-};
-
-async function enviarImagen(to, imageUrl, caption = "") {
-  try {
-    await axios.post(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
-      {
-        messaging_product: "whatsapp",
-        to,
-        type: "image",
-        image: { link: imageUrl, caption },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("Imagen enviada a", to);
-  } catch (err) {
-    console.error("Error enviando imagen:", err.response?.data || err.message);
-  }
-}
-
-function getFotoTatami(userText, replyText) {
-  const texto = (userText + " " + replyText).toLowerCase();
-  // 4cm especifico → foto con cinta métrica del 4cm
-  if (/4.?cm|cuatro.?cm/.test(texto)) {
-    return { url: FOTOS.tatami_4cm_medida, caption: "🥋 Tatami 4cm — Across Sports Perú | S/63 por m²" };
-  }
-  // 2.5cm especifico → foto colores del 2.5cm
-  if (/2.?5.?cm|dos.?medio/.test(texto)) {
-    return { url: FOTOS.tatami_2_5_colores, caption: "🥋 Tatami 2.5cm — Across Sports Perú | S/34 por m²" };
-  }
-  // 3cm especifico → foto dentado (textura del tatami)
-  if (/3.?cm|tres.?cm/.test(texto)) {
-    return { url: FOTOS.tatami_dentado, caption: "🥋 Tatami 3cm — Across Sports Perú | S/45 por m²" };
-  }
-  // Pregunta general → foto con los 3 grosores juntos
-  if (/tatami|piso|mat/.test(texto)) {
-    return { url: FOTOS.tatami_todos, caption: "🥋 Tatamis disponibles: 2.5cm S/34 | 3cm S/45 | 4cm S/63 por m² — Across Sports Perú" };
-  }
-  return null;
-}
-
-function debeEnviarFotos(userText, replyText) {
-  const triggerUser = /tatami|piso|mat|medida|grosor|color|foto|imagen|como.*(se ve|es|queda)/i.test(userText);
-  const triggerReply = /tatami|S\/\d+|cm|rojo|azul|gris|negro/i.test(replyText);
-  return triggerUser && triggerReply;
-}
-
-
-
 const ANGEL_PROMPT = `Eres Angel, el agente de ventas de Across Sports Perú. No eres un bot — eres el mejor vendedor de artículos deportivos del Perú. Tienes la mentalidad de un closer de élite: escuchas más de lo que hablas, haces las preguntas correctas, conectas emocionalmente con cada cliente y los guías naturalmente hacia la compra. Tu misión no es "vender" — es ayudar a cada persona a tomar la mejor decisión para su deporte, su familia o su negocio.
 
 Across Sports Perú vende equipamiento deportivo importado de alta calidad. Enviamos a todo Lima y provincias del Perú.
@@ -139,12 +75,8 @@ Saluda con energía, preséntate brevemente, haz UNA pregunta abierta que lo inv
 Ejemplo: "¡Hola! Soy Angel de Across Sports 👋 ¿Practicas algún deporte o estás buscando algo para empezar?"
 
 Cuando el cliente pregunta por un producto específico:
-Confirma que lo tienes, presenta TODAS las variantes disponibles con precios, luego pregunta por su contexto.
-Ejemplo tatami: "¡Sí tenemos! 🥋 Tenemos 3 grosores:
-• 2.5cm → S/34/m² (colores: Rojo/Azul, Rojo/Negro, Gris/Negro, Azul/Negro)
-• 3cm → S/45/m² (colores: Rojo/Azul, Gris/Negro)
-• 4cm → S/63/m² (colores: Rojo/Azul, Gris/Negro)
-¿Es para uso personal, academia o dojo?"
+Confirma que lo tienes, da UN dato de valor que no esperaba, luego pregunta por su contexto.
+Ejemplo: "¡Sí tenemos! Los tatamis de 4cm son los más elegidos para artes marciales en Lima 💪 ¿Es para uso propio o para un dojo/academia?"
 
 Cuando el cliente pide precio directamente:
 NO des el precio de inmediato. Primero califica. El precio sin contexto no cierra ventas.
@@ -216,7 +148,7 @@ Nunca atacas al competidor. Comparas con criterio.
 "¿HACEN DESCUENTO?" / "¿ME PUEDEN BAJAR?":
 No das descuento a la primera. El precio refleja valor.
 "El precio que te di ya es nuestro mejor precio de venta directa — trabajamos con precios justos sin inflarlo para luego bajarlo. Lo que sí puedo hacer es coordinarte el envío lo más rápido posible. ¿Te queda bien así?"
-Si insiste en descuento: responde "Déjame consultarlo con el encargado y te confirmo en unos minutos 🙏" — luego incluye en tu respuesta la línea: 🔔 CONSULTA DESCUENTO para que Luis sea notificado. No escales toda la conversación, solo avisa.
+Si insiste mucho: escala a Luis.
 
 "¿CÓMO SÉ QUE NO ES ESTAFA?":
 Esta es la objeción más importante. Resuélvela con calma y confianza, no a la defensiva.
@@ -455,7 +387,6 @@ Escala cuando:
 - Pedido mayorista o gran volumen
 - Reclamo o problema con pedido anterior
 - Quiere llamada o videollamada
-- Pide videos del producto → responde "¡Claro! Te paso un video ahora mismo 📹" y agrega en tu respuesta: 🎬 VIDEO SOLICITADO: [nombre del producto] — Luis te lo enviará en segundos. No digas que no tienes videos.
 - Pregunta por producto o precio que NO está en el catálogo
 - Insiste en descuento importante
 - Cualquier situación fuera de lo normal
@@ -477,7 +408,6 @@ REGLAS ABSOLUTAS — NUNCA ROMPERLAS
 - NUNCA das el código de protección Shalom antes del pago completo del 90%
 - NUNCA confirmas una venta ni coordinas pago sin escalar a Luis primero
 - NUNCA das el precio de delivery — eso lo calcula Luis en InDriver
-- NUNCA dices que no tienes videos — siempre di "te paso un video" y notifica con 🎬 VIDEO SOLICITADO
 - NUNCA atacas a la competencia — solo comparas con criterio
 - NUNCA preguntas todo de golpe — una sola pregunta por mensaje
 - NUNCA suenas a bot: cero "Opción 1", "Opción 2", cero menús
@@ -495,26 +425,6 @@ function authPanel(req, res, next) {
 }
 
 // ── WEBHOOK VERIFICACIÓN ──
-
-// MULTER + CLOUDINARY SDK
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
-const cloudinary = require('cloudinary').v2;
-cloudinary.config({ cloud_name: CLOUDINARY_CLOUD, api_key: CLOUDINARY_KEY, api_secret: CLOUDINARY_SECRET });
-
-async function uploadToCloudinary(buffer, filename) {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: 'acros-sports', resource_type: 'image' },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
-      }
-    );
-    stream.end(buffer);
-  });
-}
-
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -536,9 +446,10 @@ app.post("/webhook", async (req, res) => {
   const entry = body.entry?.[0];
   const change = entry?.changes?.[0];
   const message = change?.value?.messages?.[0];
-  if (!message) return;
+  if (!message || message.type !== "text") return;
 
   const from = message.from;
+  const text = message.text.body;
   const now = new Date().toISOString();
 
   if (!conversationHistory[from]) conversationHistory[from] = [];
@@ -546,78 +457,15 @@ app.post("/webhook", async (req, res) => {
     conversationMeta[from] = { firstContact: now, lastMessage: now, messageCount: 0, status: "activo" };
   }
 
-  // Manejar imágenes recibidas
-  if (message.type === "image") {
-    const mediaId = message.image?.id;
-    const caption = message.image?.caption || "";
-    try {
-      // Obtener URL de la imagen
-      const mediaRes = await axios.get(
-        `https://graph.facebook.com/v18.0/${mediaId}`,
-        { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` } }
-      );
-      const imageUrl = mediaRes.data.url;
-      // Descargar imagen y convertir a base64
-      const imgData = await axios.get(imageUrl, {
-        responseType: "arraybuffer",
-        headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` }
-      });
-      const base64 = Buffer.from(imgData.data).toString("base64");
-      const mimeType = mediaRes.data.mime_type || "image/jpeg";
-      const dataUrl = `data:${mimeType};base64,${base64}`;
-      
-      const imgMsg = caption 
-        ? `[IMAGEN] ${caption}` 
-        : "[IMAGEN enviada por el cliente]";
-      
-      conversationHistory[from].push({ 
-        role: "user", 
-        content: imgMsg,
-        imageUrl: dataUrl,
-        isImage: true
-      });
-    } catch(e) {
-      conversationHistory[from].push({ 
-        role: "user", 
-        content: "[IMAGEN enviada por el cliente — voucher/foto]",
-        isImage: true
-      });
-    }
-    conversationMeta[from].lastMessage = now;
-    conversationMeta[from].messageCount++;
-    conversationMeta[from].lastUserText = "[IMAGEN]";
-    saveData();
-    return; // No procesar con Angel, solo guardar
-  }
-
-  // Solo procesar texto
-  if (message.type !== "text") return;
-
-  const text = message.text.body;
-
   conversationHistory[from].push({ role: "user", content: text });
   saveData();
   conversationMeta[from].lastMessage = now;
   conversationMeta[from].messageCount++;
   conversationMeta[from].lastUserText = text;
 
-  // Notificar a Luis que llegó mensaje (solo si es el primer mensaje o hay escalada previa)
-  const isFirst = conversationHistory[from].length === 1;
-  if(isFirst) {
-    notificarLuis(`🔔 Nuevo cliente en Angel
-📱 +${from}
-💬 "${text.slice(0,100)}"`);
-  }
-
   // Detectar escalada
   if (text.includes("ESCALAR A LUIS") || text.includes("🔔")) {
     conversationMeta[from].status = "escalado";
-  }
-  // Detectar si cliente pide descuento o video
-  if (/descuento|rebaja|más barato|video|foto.*producto/i.test(text)) {
-    notificarLuis(`💡 Cliente pide atención especial
-📱 +${from}
-💬 "${text.slice(0,100)}"`);
   }
 
   if (conversationHistory[from].length > 20) {
@@ -650,14 +498,6 @@ app.post("/webhook", async (req, res) => {
     // Detectar escalada en respuesta de Angel
     if (reply.includes("ESCALAR A LUIS") || reply.includes("🔔")) {
       conversationMeta[from].status = "escalado";
-      // Notificar a Luis urgente
-      const resumen = reply.slice(0, 300);
-      notificarLuis(`⚠️ ANGEL NECESITA TU AYUDA
-📱 Cliente: +${from}
-
-${resumen}
-
-👉 Panel: https://angel-across-sports-production.up.railway.app/panel`);
     }
 
     await axios.post(
@@ -675,13 +515,6 @@ ${resumen}
         },
       }
     );
-
-    // Enviar foto correcta según el producto mencionado
-    const fotoData = getFotoTatami(text, reply);
-    if (fotoData) {
-      await enviarImagen(from, fotoData.url, fotoData.caption);
-    }
-
   } catch (err) {
     console.error("Error:", err.response?.data || err.message);
   }
@@ -738,66 +571,6 @@ app.post("/panel/send", authPanel, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error("Error enviando mensaje:", err.response?.data || err.message);
-    res.status(500).json({ error: err.response?.data || err.message });
-  }
-});
-
-// POST /panel/send-image — enviar imagen desde el panel
-app.post("/panel/send-image", authPanel, async (req, res) => {
-  const { phone, imageUrl, caption } = req.body;
-  if (!phone || !imageUrl) {
-    return res.status(400).json({ error: "Falta phone o imageUrl" });
-  }
-  try {
-    await axios.post(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
-      {
-        messaging_product: "whatsapp",
-        to: phone,
-        type: "image",
-        image: { link: imageUrl, caption: caption || "" },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (!conversationHistory[phone]) conversationHistory[phone] = [];
-    conversationHistory[phone].push({ 
-      role: "assistant", 
-      content: caption ? `[IMAGEN] ${caption}` : "[IMAGEN enviada]",
-      imageUrl,
-      isImage: true
-    });
-    saveData();
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Error enviando imagen:", err.response?.data || err.message);
-    res.status(500).json({ error: err.response?.data || err.message });
-  }
-});
-
-
-app.post('/panel/upload-and-send', authPanel, upload.single('image'), async (req, res) => {
-  const phone = req.body.phone;
-  const caption = req.body.caption || '';
-  if (!phone || !req.file) return res.status(400).json({ error: 'Falta phone o imagen' });
-  try {
-    const url = await uploadToCloudinary(req.file.buffer, req.file.originalname);
-    await axios.post(
-      'https://graph.facebook.com/v18.0/' + PHONE_NUMBER_ID + '/messages',
-      { messaging_product: 'whatsapp', to: phone, type: 'image', image: { link: url, caption } },
-      { headers: { Authorization: 'Bearer ' + WHATSAPP_TOKEN, 'Content-Type': 'application/json' } }
-    );
-    if (!conversationHistory[phone]) conversationHistory[phone] = [];
-    conversationHistory[phone].push({ role: 'assistant', content: caption ? '[IMAGEN] ' + caption : '[IMAGEN enviada]', imageUrl: url, isImage: true });
-    saveData();
-    res.json({ success: true, url });
-  } catch (err) {
-    console.error('Error Cloudinary:', err.response?.data || err.message);
     res.status(500).json({ error: err.response?.data || err.message });
   }
 });
