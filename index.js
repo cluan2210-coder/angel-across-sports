@@ -439,7 +439,7 @@ function authPanel(req, res, next) {
 
 // MULTER
 const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 // CLOUDINARY
 const cloudinary = require('cloudinary').v2;
