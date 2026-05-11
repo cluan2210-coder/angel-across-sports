@@ -49,6 +49,23 @@ const conversationHistory = savedConvs;
 const conversationMeta = savedMeta;
 console.log(`Datos cargados: ${Object.keys(conversationHistory).length} conversaciones`);
 
+// ── HELPER: normalizar meta con campos nuevos sin romper datos antiguos ──
+function initMeta(phone) {
+  if (!conversationMeta[phone]) {
+    conversationMeta[phone] = { firstContact: new Date().toISOString(), lastMessage: new Date().toISOString(), messageCount: 0, status: 'nuevo' };
+  }
+  const m = conversationMeta[phone];
+  if (m.angelEnabled === undefined) m.angelEnabled = true;
+  if (!m.status)          m.status          = m.status === 'escalado' ? 'requiere_luis' : (m.status || 'nuevo');
+  if (!m.tags)            m.tags            = [];
+  if (m.notes === undefined) m.notes        = '';
+  if (m.reminder === undefined) m.reminder  = null;
+  if (!m.productInterest) m.productInterest = '';
+  if (!m.location)        m.location        = '';
+  if (!m.clientName)      m.clientName      = '';
+  return m;
+}
+
 const ANGEL_PROMPT = `Eres Angel, el agente de ventas de Across Sports Perú. No eres un bot — eres el mejor vendedor de artículos deportivos del Perú. Tienes la mentalidad de un closer de élite: escuchas más de lo que hablas, haces las preguntas correctas, conectas emocionalmente con cada cliente y los guías naturalmente hacia la compra. Tu misión no es "vender" — es ayudar a cada persona a tomar la mejor decisión para su deporte, su familia o su negocio.
 
 Across Sports Perú vende equipamiento deportivo importado de alta calidad. Enviamos a todo Lima y provincias del Perú.
@@ -559,6 +576,13 @@ app.post("/webhook", async (req, res) => {
     conversationHistory[from] = conversationHistory[from].slice(-20);
   }
 
+  // Respetar angel-toggle: si Ángel está pausado, no responder
+  initMeta(from);
+  if (conversationMeta[from].angelEnabled === false) {
+    saveData();
+    return;
+  }
+
   try {
     // Delay natural para simular que está escribiendo (3-6 segundos)
     const delay = Math.floor(Math.random() * 3000) + 3000;
@@ -619,13 +643,14 @@ app.get("/panel/conversations", authPanel, (req, res) => {
   const result = {};
   Object.entries(conversationHistory).forEach(([phone, messages]) => {
     result[phone] = messages.map(m => ({
-      role: m.role,
-      content: m.content,
-      time: conversationMeta[phone]?.lastMessage || new Date().toISOString(),
-      imageUrl: m.imageUrl || null,
-      isImage: m.isImage || false,
-      time: m.time || null,
-      date: m.date || null,
+      role:       m.role,
+      content:    m.content,
+      imageUrl:   m.imageUrl   || null,
+      isImage:    m.isImage    || false,
+      time:       m.time       || null,
+      date:       m.date       || null,
+      sender:     m.sender     || null,
+      senderType: m.senderType || null,
     }));
   });
   res.json(result);
@@ -676,12 +701,18 @@ app.post("/panel/send", authPanel, async (req, res) => {
 
     // Guardar en historial
     if (!conversationHistory[phone]) conversationHistory[phone] = [];
-    conversationHistory[phone].push({ role: "assistant", content: message });
-    if (!conversationMeta[phone]) {
-      conversationMeta[phone] = { firstContact: new Date().toISOString(), status: "activo", messageCount: 0 };
-    }
+    conversationHistory[phone].push({
+      role:       "assistant",
+      content:    message,
+      sender:     req.body.sender || 'Luis',
+      senderType: 'human',
+      time:       new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+      date:       new Date().toLocaleDateString('es-PE'),
+    });
+    initMeta(phone);
     conversationMeta[phone].lastMessage = new Date().toISOString();
-    conversationMeta[phone].lastReply = message;
+    conversationMeta[phone].lastReply   = message;
+    saveData();
 
     res.json({ success: true });
   } catch (err) {
@@ -766,6 +797,79 @@ app.get("/panel/campaigns", authPanel, (req, res) => {
     campaigns: [],
     message: "Configura META_AD_ACCOUNT_ID en Railway para ver campañas reales.",
   });
+});
+
+// ── NUEVOS ENDPOINTS CRM ──
+
+// GET /panel/meta — devuelve todos los metadatos de conversaciones
+app.get('/panel/meta', authPanel, (req, res) => {
+  Object.keys(conversationHistory).forEach(p => initMeta(p));
+  res.json(conversationMeta);
+});
+
+// POST /panel/conversations/:phone/angel-toggle
+app.post('/panel/conversations/:phone/angel-toggle', authPanel, (req, res) => {
+  const { phone } = req.params;
+  const enabled   = req.body.enabled === true || req.body.enabled === 'true';
+  initMeta(phone);
+  conversationMeta[phone].angelEnabled = enabled;
+  saveData();
+  res.json({ success: true, angelEnabled: enabled });
+});
+
+// POST /panel/conversations/:phone/status
+app.post('/panel/conversations/:phone/status', authPanel, (req, res) => {
+  const { phone }  = req.params;
+  const { status } = req.body;
+  const valid = ['nuevo','seguimiento','requiere_luis','cotizacion','esperando_pago','cerrado','perdido'];
+  if (!valid.includes(status)) return res.status(400).json({ error: 'Estado no válido' });
+  initMeta(phone);
+  conversationMeta[phone].status = status;
+  saveData();
+  res.json({ success: true, status });
+});
+
+// POST /panel/conversations/:phone/tags
+app.post('/panel/conversations/:phone/tags', authPanel, (req, res) => {
+  const { phone } = req.params;
+  const { tags }  = req.body;
+  if (!Array.isArray(tags)) return res.status(400).json({ error: 'tags debe ser array' });
+  initMeta(phone);
+  conversationMeta[phone].tags = tags;
+  saveData();
+  res.json({ success: true, tags });
+});
+
+// POST /panel/conversations/:phone/note
+app.post('/panel/conversations/:phone/note', authPanel, (req, res) => {
+  const { phone } = req.params;
+  initMeta(phone);
+  conversationMeta[phone].notes = req.body.text || '';
+  saveData();
+  res.json({ success: true });
+});
+
+// POST /panel/conversations/:phone/reminder
+app.post('/panel/conversations/:phone/reminder', authPanel, (req, res) => {
+  const { phone }            = req.params;
+  const { datetime, text }   = req.body;
+  if (!datetime) return res.status(400).json({ error: 'Falta datetime' });
+  initMeta(phone);
+  conversationMeta[phone].reminder = { datetime, text: text || '' };
+  saveData();
+  res.json({ success: true, reminder: conversationMeta[phone].reminder });
+});
+
+// POST /panel/conversations/:phone/info
+app.post('/panel/conversations/:phone/info', authPanel, (req, res) => {
+  const { phone }                          = req.params;
+  const { clientName, productInterest, location } = req.body;
+  initMeta(phone);
+  if (clientName      !== undefined) conversationMeta[phone].clientName      = clientName;
+  if (productInterest !== undefined) conversationMeta[phone].productInterest = productInterest;
+  if (location        !== undefined) conversationMeta[phone].location        = location;
+  saveData();
+  res.json({ success: true });
 });
 
 // ── SERVIR PANEL HTML ──
