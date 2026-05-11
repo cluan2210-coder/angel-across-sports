@@ -410,7 +410,190 @@ option{background:#12161e}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @media(max-width:1400px){#app{grid-template-columns:220px 280px 1fr 300px}}
-@media(max-width:1100px){#app{grid-template-columns:0 260px 1fr 0}.sidebar{display:none}.right-col{display:none}}
+
+/* ══ TABLET (768–1100px) ══ */
+@media(min-width:768px) and (max-width:1100px){
+  #app{grid-template-columns:250px 1fr;grid-template-rows:52px 1fr}
+  .sidebar{display:none}
+  .topbar{grid-column:1/3;grid-row:1}
+  .conv-col{grid-column:1;grid-row:2}
+  .chat-col{grid-column:2;grid-row:2}
+  .right-col{
+    position:fixed;right:-330px;top:0;bottom:56px;width:min(330px,82vw);
+    display:flex;flex-direction:column;
+    z-index:900;overflow-y:auto;
+    transition:right .3s cubic-bezier(.4,0,.2,1);
+    background:var(--bg);border-left:1px solid var(--bdr);box-shadow:none;
+  }
+  .right-col.mob-open{right:0;box-shadow:-6px 0 36px rgba(0,0,0,.55)}
+  .mob-ham{display:flex!important}
+  .mob-info-btn{display:flex!important}
+  .mob-overlay.open{display:block}
+}
+
+/* ══ MOBILE (≤767px) ══ */
+@media(max-width:767px){
+  /* App: stacked flexbox */
+  #app{
+    display:flex!important;
+    flex-direction:column;
+    height:100vh;
+    padding-bottom:56px;
+    grid-template-columns:unset!important;
+    grid-template-rows:unset!important;
+  }
+
+  /* Topbar: simpler */
+  .topbar{
+    grid-column:unset;grid-row:unset;
+    padding:0 12px;height:52px;flex-shrink:0;gap:8px;
+  }
+  .t-sep,.t-search,.t-spacer,.t-chip,.t-bell,.t-user-info{display:none!important}
+  .t-uav{width:28px;height:28px;font-size:11px}
+
+  /* Sidebar: off-screen drawer */
+  .sidebar{
+    position:fixed;left:-264px;top:0;bottom:0;width:min(264px,82vw);
+    z-index:910;grid-column:unset;grid-row:unset;
+    transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:none;
+  }
+  .sidebar.mob-open{left:0;box-shadow:4px 0 32px rgba(0,0,0,.6)}
+
+  /* Conversation column */
+  .conv-col{
+    grid-column:unset;grid-row:unset;
+    display:none;flex:1;overflow:hidden;background:var(--bg-card);
+  }
+  #app[data-mv="list"] .conv-col{display:flex}
+
+  /* Chat column */
+  .chat-col{
+    grid-column:unset;grid-row:unset;
+    display:none;flex:1;overflow:hidden;
+  }
+  #app[data-mv="chat"] .chat-col{display:flex}
+
+  /* Right column: off-screen drawer */
+  .right-col{
+    position:fixed!important;right:-360px;top:0;bottom:0;width:min(360px,94vw);
+    display:flex!important;flex-direction:column;
+    z-index:910;overflow-y:auto;
+    transition:right .3s cubic-bezier(.4,0,.2,1);
+    background:var(--bg);border-left:1px solid var(--bdr);box-shadow:none;
+    grid-column:unset;grid-row:unset;
+  }
+  .right-col.mob-open{right:0;box-shadow:-6px 0 36px rgba(0,0,0,.6)}
+  #rEmpty,#rightPanel{min-height:0}
+
+  /* Mobile controls visible */
+  .mob-ham{display:flex!important}
+  .mob-back-btn{display:flex!important}
+  .mob-info-btn{display:flex!important}
+  .mob-overlay.open{display:block}
+
+  /* Larger touch targets on conv list */
+  .c-item{padding:14px 13px}
+  .c-av{width:46px;height:46px;font-size:18px}
+  .c-name{font-size:13px}
+  .c-preview{font-size:12px}
+  .conv-tab{padding:11px 10px;font-size:12.5px}
+
+  /* Chat header: compact, hide desktop buttons */
+  .chat-hdr{height:58px;padding:0 10px;gap:8px}
+  .hdr-name{font-size:14px}
+  .ch-btn,.ch-ico{display:none!important}
+
+  /* Messages */
+  .msgs-area{padding:16px 12px}
+  .bubble{max-width:88%;padding:10px 13px}
+
+  /* Footer */
+  .foot-main{padding:8px 12px 8px}
+  .foot-actions{padding:0 12px 10px;gap:5px}
+  .fa{padding:10px 8px;font-size:11px}
+  #msgInput{font-size:14px}
+
+  /* Conv search */
+  .conv-search{padding:10px 12px}
+  .conv-tabs{overflow-x:auto;scrollbar-width:none}
+  .conv-tabs::-webkit-scrollbar{display:none}
+}
+
+/* ══ MOBILE-ONLY ELEMENTS (hidden on desktop ≥768px) ══ */
+.mob-ham,.mob-back-btn,.mob-info-btn,.mob-nav,.mob-overlay{display:none}
+
+.mob-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:850;backdrop-filter:blur(3px);
+}
+
+/* Bottom navigation bar */
+.mob-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:56px;z-index:700;
+  background:var(--bg-card);border-top:1px solid var(--bdr);
+  display:flex;align-items:stretch;padding:0 4px;
+  -webkit-backdrop-filter:blur(12px);
+}
+.mob-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border-radius:var(--r-sm);cursor:pointer;
+  font-size:9.5px;font-weight:600;letter-spacing:.2px;
+  color:var(--tx-3);background:none;border:none;padding:4px 6px;
+  transition:all .15s;position:relative;
+}
+.mob-nav-btn.on{color:var(--or-hi)}
+.mob-nav-btn.on .mob-nav-ico{filter:drop-shadow(0 0 4px rgba(245,101,22,.5))}
+.mob-nav-btn:disabled{opacity:.28;cursor:default}
+.mob-nav-ico{font-size:20px;line-height:1;display:block}
+
+/* Hamburger button */
+.mob-ham{
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;width:36px;height:36px;border-radius:var(--r-sm);
+  background:transparent;border:1px solid var(--bdr);cursor:pointer;
+  transition:all .15s;flex-shrink:0;margin-right:4px;
+}
+.mob-ham:hover{background:var(--bg-el)}
+.mob-ham span{display:block;width:15px;height:2px;background:var(--tx-2);border-radius:2px;transition:all .15s}
+.mob-ham:hover span{background:var(--tx-1)}
+
+/* Back button in chat header */
+.mob-back-btn{
+  align-items:center;justify-content:center;
+  min-width:36px;height:36px;border-radius:var(--r-sm);
+  background:transparent;border:1px solid var(--bdr);
+  color:var(--tx-2);font-size:20px;font-weight:400;
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.mob-back-btn:hover{background:var(--bg-el);color:var(--tx-1)}
+
+/* Info button in chat header */
+.mob-info-btn{
+  align-items:center;justify-content:center;
+  min-width:36px;height:36px;border-radius:var(--r-sm);
+  background:var(--or-bg);border:1px solid var(--or-bdr);
+  color:var(--or-hi);font-size:16px;cursor:pointer;
+  transition:all .15s;flex-shrink:0;
+}
+.mob-info-btn:hover{background:rgba(245,101,22,.2)}
+
+/* Drawer close row at top of right-col */
+.mob-drawer-hdr{
+  display:none;align-items:center;gap:10px;
+  padding:14px 16px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;
+}
+.mob-drawer-close{
+  width:30px;height:30px;border-radius:var(--r-sm);
+  background:var(--bg-el);border:1px solid var(--bdr);
+  color:var(--tx-2);font-size:15px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.mob-drawer-close:hover{background:var(--bg-hl);color:var(--tx-1)}
+.mob-drawer-hdr-title{font-size:13px;font-weight:600;color:var(--tx-1)}
+@media(max-width:767px){.mob-drawer-hdr{display:flex}}
+@media(min-width:768px) and (max-width:1100px){.mob-drawer-hdr{display:flex}}
 </style>
 </head>
 <body>
@@ -431,7 +614,7 @@ option{background:#12161e}
 </div>
 
 <!-- ─── APP ─── -->
-<div id="app" style="display:none">
+<div id="app" style="display:none" data-mv="list">
 
   <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar">
@@ -525,6 +708,7 @@ option{background:#12161e}
 
   <!-- ══ TOPBAR ══ -->
   <header class="topbar">
+    <button class="mob-ham" onclick="openSidebar()"><span></span><span></span><span></span></button>
     <div class="t-title-block">
       <div class="t-title">Centro de Ventas ACROS</div>
       <div class="t-subtitle">Panel de Control · Ángel IA</div>
@@ -590,6 +774,7 @@ option{background:#12161e}
 
     <div id="chatView">
       <div class="chat-hdr">
+        <button class="mob-back-btn" onclick="mobGoBack()" title="Volver">‹</button>
         <div class="hdr-av" id="hdrAv">?</div>
         <div class="hdr-info">
           <div class="hdr-name" id="hdrName">—</div>
@@ -606,6 +791,7 @@ option{background:#12161e}
           <button class="ch-btn warn" onclick="tomarControl()" id="tomarControlBtn">⊘ Tomar control</button>
           <button class="ch-btn" onclick="masOpciones()">··· Opciones</button>
           <div class="ch-ico" onclick="fetchAll()" title="Actualizar">↻</div>
+          <button class="mob-info-btn" onclick="openInfo()" title="Info cliente">👤</button>
         </div>
       </div>
 
@@ -638,6 +824,12 @@ option{background:#12161e}
   <aside class="right-col">
     <div class="r-empty" id="rEmpty">
       Selecciona una conversación<br>para ver la ficha del cliente
+    </div>
+
+    <!-- Drawer header (visible only on mobile/tablet) -->
+    <div class="mob-drawer-hdr">
+      <div class="mob-drawer-close" onclick="closeInfo()">✕</div>
+      <div class="mob-drawer-hdr-title">Ficha del cliente</div>
     </div>
 
     <div id="rightPanel">
@@ -782,6 +974,23 @@ option{background:#12161e}
 
 </div>
 
+<!-- ─── MOBILE: Overlay + Bottom Nav ─── -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeAllDrawers()"></div>
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-btn on" id="mnList" onclick="mobGoList()">
+    <span class="mob-nav-ico">💬</span>
+    <span>Chats</span>
+  </button>
+  <button class="mob-nav-btn" id="mnChat" onclick="mobGoChat()" disabled>
+    <span class="mob-nav-ico">📲</span>
+    <span>Chat</span>
+  </button>
+  <button class="mob-nav-btn" id="mnInfo" onclick="openInfo()" disabled>
+    <span class="mob-nav-ico">👤</span>
+    <span>Info</span>
+  </button>
+</nav>
+
 <input type="file" id="fileIn" accept="image/*" style="display:none" onchange="uploadImg(event)">
 <div id="imgModal" onclick="this.classList.remove('open')"><img id="modalImg" src="" alt=""></div>
 <div id="toasts"></div>
@@ -835,7 +1044,7 @@ function doLogin() {
   req('GET','/panel/health')
     .then(() => {
       document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('app').style.display = 'grid';
+      document.getElementById('app').style.display = window.innerWidth < 768 ? 'flex' : 'grid';
       buildQR();
       init();
     })
@@ -985,6 +1194,12 @@ function pick(p) {
   renderList();
   renderChat();
   renderRight();
+  // Enable mobile nav + switch to chat
+  const mnChat = document.getElementById('mnChat');
+  const mnInfo = document.getElementById('mnInfo');
+  if (mnChat) mnChat.disabled = false;
+  if (mnInfo) mnInfo.disabled = false;
+  if (isMob()) mobView('chat');
 }
 
 /* ─── RENDER CHAT ─── */
@@ -1311,6 +1526,7 @@ function sbFilter(item, f) {
     b.classList.toggle('on', b.dataset.filter === (f === 'all' ? 'all' : '')));
   filter = f;
   renderList();
+  if (isMob()) closeAllDrawers(); // close sidebar drawer on mobile after selecting
 }
 
 function onSearch() { query = document.getElementById('searchInput').value.trim(); renderList(); }
@@ -1406,6 +1622,72 @@ function stLabel(s) {
   };
   return m[s] || s;
 }
+
+/* ─── MOBILE NAV ─── */
+function isMob() { return window.innerWidth < 768; }
+function isTablet() { return window.innerWidth >= 768 && window.innerWidth <= 1100; }
+
+function mobView(v) {
+  if (!isMob()) return;
+  document.getElementById('app').dataset.mv = v;
+  document.getElementById('mnList').classList.toggle('on', v === 'list');
+  document.getElementById('mnChat').classList.toggle('on', v === 'chat');
+  if (v === 'chat') {
+    const area = document.getElementById('msgsArea');
+    if (area) setTimeout(() => { area.scrollTop = area.scrollHeight; }, 60);
+  }
+}
+
+function mobGoList() { if (isMob()) mobView('list'); }
+
+function mobGoChat() {
+  if (!phone) { toast('Abre una conversación primero', 'inf'); return; }
+  if (isMob()) mobView('chat');
+}
+
+function mobGoBack() {
+  if (isMob()) mobView('list');
+}
+
+function openSidebar() {
+  document.querySelector('.sidebar').classList.add('mob-open');
+  document.getElementById('mobOverlay').classList.add('open');
+}
+
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('mob-open');
+}
+
+function openInfo() {
+  if (!phone && (isMob() || isTablet())) {
+    toast('Selecciona una conversación primero', 'inf'); return;
+  }
+  document.querySelector('.right-col').classList.add('mob-open');
+  document.getElementById('mobOverlay').classList.add('open');
+}
+
+function closeInfo() {
+  document.querySelector('.right-col').classList.remove('mob-open');
+  document.getElementById('mobOverlay').classList.remove('open');
+}
+
+function closeAllDrawers() {
+  closeSidebar();
+  document.querySelector('.right-col').classList.remove('mob-open');
+  document.getElementById('mobOverlay').classList.remove('open');
+}
+
+/* Resize: fix display mode if user rotates device */
+window.addEventListener('resize', () => {
+  const app = document.getElementById('app');
+  if (!app || app.style.display === 'none') return;
+  if (window.innerWidth >= 768) {
+    app.style.display = 'grid';
+    closeAllDrawers();
+  } else {
+    app.style.display = 'flex';
+  }
+});
 </script>
 </body>
 </html>
